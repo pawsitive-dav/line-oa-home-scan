@@ -1,0 +1,250 @@
+@import url("https://fonts.googleapis.com/css2?family=Prompt:wght@500;600;700&display=swap");
+
+:root {
+  --opacity-1: 4%;
+  --opacity-2: 12%;
+  --opacity-3: 42%;
+  --opacity-4: 32%;
+
+  --deep-blue-900: #17374c;
+  --deep-blue-800: #1b4059;
+  --deep-blue-700: #1e4966;
+  --deep-blue-600: #225272;
+  --deep-blue-500: #265b7f;
+  --deep-blue-400: #517c99;
+  --deep-blue-300: #7d9db2;
+  --deep-blue-200: #a8bdcc;
+  --deep-blue-100: #d4dee5;
+  --deep-blue-opacity-1: rgb(38, 91, 127, var(--opacity-1));
+  --deep-blue-opacity-2: rgb(38, 91, 127, var(--opacity-2));
+  --deep-blue-opacity-3: rgb(38, 91, 127, var(--opacity-3));
+  --deep-blue-opacity-4: rgb(38, 91, 127, var(--opacity-4));
+
+  --green-900: #207146;
+  --green-800: #268452;
+  --green-700: #2b965e;
+  --green-600: #31a969;
+  --green-500: #36bc75;
+  --green-400: #5ec991;
+  --green-300: #86d7ac;
+  --green-200: #afe4c8;
+  --green-100: #d7f2e3;
+  --green-opacity-1: rgba(54, 188, 117, var(--opacity-1));
+  --green-opacity-2: rgba(54, 188, 117, var(--opacity-2));
+  --green-opacity-3: rgba(54, 188, 117, var(--opacity-3));
+  --green-opacity-4: rgba(54, 188, 117, var(--opacity-4));
+
+  --blue-900: #2e6595;
+  --blue-800: #3576ae;
+  --blue-700: #3d86c6;
+  --blue-600: #4497df;
+  --blue-500: #4ca8f8;
+  --blue-400: #70b9f9;
+  --blue-300: #94cbfb;
+  --blue-200: #b7dcfc;
+  --blue-100: #dbeefe;
+  --blue-opacity-1: rgba(76, 168, 248, var(--opacity-1));
+  --blue-opacity-2: rgba(76, 168, 248, var(--opacity-2));
+  --blue-opacity-3: rgba(76, 168, 248, var(--opacity-3));
+  --blue-opacity-4: rgba(76, 168, 248, var(--opacity-4));
+
+  --red-900: #8e473d;
+  --red-800: #a65347;
+  --red-700: #be5e51;
+  --red-600: #d56a5b;
+  --red-500: #ed7665;
+  --red-400: #f19184;
+  --red-300: #f4ada3;
+  --red-200: #f8c8c1;
+  --red-100: #fbe4e0;
+  --red-opacity-1: rgba(237, 118, 101, var(--opacity-1));
+  --red-opacity-2: rgba(237, 118, 101, var(--opacity-2));
+  --red-opacity-3: rgba(237, 118, 101, var(--opacity-3));
+  --red-opacity-4: rgba(237, 118, 101, var(--opacity-4));
+
+  --orange-900: #865922;
+  --orange-800: #9d6827;
+  --orange-700: #b3762d;
+  --orange-600: #ca8532;
+  --orange-500: #e09438;
+  --orange-400: #e6a960;
+  --orange-300: #ecbf88;
+  --orange-200: #f3d4af;
+  --orange-100: #f9ead7;
+  --orange-opacity-1: rgba(224, 148, 56, var(--opacity-1));
+  --orange-opacity-2: rgba(224, 148, 56, var(--opacity-2));
+  --orange-opacity-3: rgba(224, 148, 56, var(--opacity-3));
+  --orange-opacity-4: rgba(224, 148, 56, var(--opacity-4));
+
+  --gray-900: #171a1c;
+  --gray-800: #454849;
+  --gray-700: #5d5f60;
+  --gray-600: #747677;
+  --gray-500: #8b8c8d;
+  --gray-400: #a2a3a4;
+  --gray-300: #b9babb;
+  --gray-200: #d1d1d2;
+  --gray-100: #e8e8e8;
+  --gray-opacity-1: rgba(23, 26, 28, var(--opacity-1));
+  --gray-opacity-2: rgba(23, 26, 28, var(--opacity-2));
+  --gray-opacity-3: rgba(23, 26, 28, var(--opacity-3));
+  --gray-opacity-4: rgba(23, 26, 28, var(--opacity-4));
+
+  --base-primary: var(--deep-blue-500);
+  --base-secondary: var(--gray-600);
+  --base-info: var(--blue-500);
+  --base-success: var(--green-500);
+  --base-warning: var(--orange-500);
+  --base-error: var(--red-500);
+  --base-light: #fefeff;
+  --base-dark: var(--gray-900);
+
+  --base-border: var(--gray-400);
+  --base-border-disable: var(--gray-200);
+  --base-border-light: var(--base-light);
+  --base-border-dark: var(--base-dark);
+
+  --box-shadow-sm: 0px 1px 3px 0px rgba(0, 0, 0, 0.06),
+    0px 1px 4px 0px rgba(0, 0, 0, 0.1);
+  --box-shadow-md: 0px 7px 8px -1px rgba(0, 0, 0, 0.05),
+    0px 1px 12px -1px rgba(0, 0, 0, 0.1);
+  --box-shadow-lg: 0px 0px 9px 0px rgba(0, 0, 0, 0.05),
+    0px 10px 20px -2px rgba(0, 0, 0, 0.1);
+  --box-shadow-xl: 0px -3px 10px 0px rgba(0, 0, 0, 0.04),
+    0px 14px 25px -2px rgba(0, 0, 0, 0.1);
+
+  --font-size-h1: 1.802rem;
+  --font-size-h2: 1.602rem;
+  --font-size-h3: 1.424rem;
+  --font-size-title: 1.266rem;
+  --font-size-subtitle: 1.125rem;
+  --font-size-body: 1rem;
+  --font-size-caption: 0.889rem;
+  --font-size-overline: 0.79rem;
+
+  --spacing-1: 2px;
+  --spacing-2: 4px;
+  --spacing-3: 8px;
+  --spacing-4: 12px;
+  --spacing-5: 16px;
+  --spacing-6: 24px;
+  --spacing-7: 32px;
+  --spacing-8: 48px;
+  --spacing-9: 72px;
+}
+
+html {
+  font-size: 100%;
+} /*Base Font Size 15px*/
+
+body {
+  font-family: "Prompt", sans-serif;
+  font-size: var(--font-size-body);
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--gray-800);
+  background-color: var(--deep-blue-opacity-1);
+}
+
+.cp-main-bg {
+  background-color: var(--deep-blue-opacity-1);
+}
+
+/* Typography */
+.cp-header-1 {
+  font-size: var(--font-size-h1);
+}
+.cp-header-2 {
+  font-size: var(--font-size-h2);
+}
+.cp-header-3 {
+  font-size: var(--font-size-h3);
+}
+.cp-title {
+  font-size: var(--font-size-title);
+}
+.cp-subtitle {
+  font-size: var(--font-size-subtitle);
+}
+.cp-body {
+  font-size: var(--font-size-body);
+}
+.cp-caption {
+  font-size: var(--font-size-caption);
+}
+.cp-overline {
+  font-size: var(--font-size-overline);
+}
+
+.cp-light {
+  font-weight: 300;
+}
+.cp-regular {
+  font-weight: 400;
+}
+.cp-medium {
+  font-weight: 500;
+}
+.cp-semibold {
+  font-weight: 600;
+}
+.cp-bold {
+  font-weight: 700;
+}
+
+/* Shadow */
+.shadow-sm {
+  box-shadow: var(--box-shadow-sm);
+}
+.shadow-md {
+  box-shadow: var(--box-shadow-md);
+}
+.shadow-lg {
+  box-shadow: var(--box-shadow-lg);
+}
+.shadow-xl {
+  box-shadow: var(--box-shadow-xl);
+}
+
+.cp-text-uppercase {
+  text-transform: uppercase;
+}
+
+.cp-text-capitalize {
+  text-transform: capitalize;
+}
+
+.cp-text-description {
+  color: var(--gray-600);
+}
+
+.cp-text-disable {
+  color: var(--gray-400);
+}
+
+.cp-text-primary {
+  color: var(--base-primary);
+}
+
+.cp-text-warning {
+  color: var(--base-warning);
+}
+
+.cp-appbar {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  border-radius: 6px;
+  background-color: #ffffff;
+  padding: 8px 0;
+}
+
+.label-content {
+  font-size: var(--font-size-subtitle);
+  color: var(--gray-800);
+  font-weight: 500;
+}
+
+.cp-app-footer {
+  background-color: var(--base-light);
+}
