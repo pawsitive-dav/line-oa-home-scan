@@ -137,7 +137,7 @@
                         <v-list-item
                           @click="
                             $router.push(
-                              `detail/inspection?id=${list.inspection_id}`
+                              `/projects/detail/inspection?id=${list.inspection_id}`
                             )
                           "
                         >

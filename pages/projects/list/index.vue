@@ -84,7 +84,11 @@
                 </template>
                 <v-list dense nav>
                   <v-list-item
-                    @click="$router.push(`list/detail?id=${list.project_id}`)"
+                    @click="
+                      $router.push(
+                        `/projects/list/detail?id=${list.project_id}`
+                      )
+                    "
                   >
                     <v-icon small left>mdi-open-in-new</v-icon>
                     <span>ดูรายละเอียด</span>
