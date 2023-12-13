@@ -127,7 +127,9 @@
             outlined
             color="primary"
             class="mb-4"
-            @click="$router.push(`reports/detail?id=${item.report_id}`)"
+            @click="
+              $router.push(`/projects/reports/detail?id=${item.report_id}`)
+            "
           >
             <span class="cp-body">ดูข้อมูล</span>
             <v-icon right>mdi-open-in-new</v-icon>

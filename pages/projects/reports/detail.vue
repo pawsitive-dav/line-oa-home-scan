@@ -5,7 +5,7 @@
       <v-col cols="12">
         <div class="d-flex">
           <v-sheet
-            width="300"
+            width="100%"
             height="30"
             color="grey lighten-3"
             class="mt-6"
@@ -18,7 +18,7 @@
           ></v-sheet>
         </div>
         <v-sheet
-          width="200"
+          width="100%"
           height="30"
           color="grey lighten-3"
           class="mt-6"
@@ -34,113 +34,159 @@
   </div>
 
   <div v-else>
-    <div class="d-flex cp-text-description cp-subtitle cp-medium">
-      <span class="mr-1" @click="$router.push('/projects/reports')">
-        <cp-link> <v-icon>mdi-chevron-left</v-icon> ย้อนกลับ </cp-link>
-      </span>
-
-      <v-spacer></v-spacer>
-
-      <div>
-        <div v-if="reportDetail.report_status == 'in-progress'">
-          <v-chip label color="warning">กำลังดำเนินการ</v-chip>
-        </div>
-        <div v-else-if="reportDetail.report_status == 'approval'">
-          <div class="d-flex align-center">
-            <v-chip label color="info">รอการยืนยัน</v-chip>
-            <!-- <v-avatar size="40" color="primary">
-              <v-img
-                v-if="reportDetail.checker_supervisor.avatar_path"
-                :src="reportDetail.checker_supervisor.avatar_path"
-              />
-              <v-img v-else :src="require('@/assets/images/no-avatar.png')" />
-            </v-avatar>
-            <div class="ml-4">
-              <div class="cp-semibold cp-body">ผู้ยืนยัน</div>
-              <div class="cp-caption cp-text-description truncate">
-                ({{ reportDetail.checker_supervisor.code_name }})
-                {{
-                  reportDetail.checker_supervisor.first_name +
-                  " " +
-                  reportDetail.checker_supervisor.last_name
-                }}
-              </div>
-            </div> -->
-          </div>
-        </div>
-        <div v-else-if="reportDetail.report_status == 'approved'">
-          <div class="d-flex align-center">
-            <v-chip label color="success"> รายงานได้รับการยืนยัน </v-chip>
-            <!-- <v-avatar size="40" color="primary">
-              <v-img
-                v-if="reportDetail.approved_by.avatar_path"
-                :src="reportDetail.approved_by.avatar_path"
-              />
-              <v-img v-else :src="require('@/assets/images/no-avatar.png')" />
-            </v-avatar>
-            <div class="ml-4">
-              <div class="cp-caption truncate">
-                <span class="cp-semibold">ยืนยันโดย:</span>
-                <span class="cp-text-description">
-                  ({{ reportDetail.approved_by.code_name }})
-                  {{
-                    reportDetail.approved_by.first_name +
-                    " " +
-                    reportDetail.approved_by.last_name
-                  }}
-                </span>
-              </div>
-              <div class="cp-caption cp-text-description">
-                <v-icon small>mdi-calendar-clock-outline</v-icon>
-                {{ formatDate(reportDetail.approved_at) }}
-              </div>
-            </div> -->
-          </div>
-        </div>
+    <div class="d-flex align-center cp-text-description cp-body cp-medium">
+      <div @click="$router.push('/projects/reports')">
+        <v-icon>mdi-chevron-left</v-icon>
+        ย้อนกลับ
+      </div>
+      <v-spacer />
+      <v-btn
+        v-if="reportDetail.report_status == 'approved'"
+        :loading="downloadPDFLoading"
+        color="primary"
+        outlined
+        @click="createPDF()"
+      >
+        <v-icon class="mr-2">mdi-file-star-outline</v-icon>
+        สร้างรายงาน (PDF)
+      </v-btn>
+      <div v-if="reportDetail.report_status == 'approval'">
+        <v-btn
+          v-if="
+            accountId == reportDetail.checker_supervisor.account_id ||
+            role == 'Project Manager' ||
+            role == 'Supervisor'
+          "
+          color="success"
+          elevation="0"
+          @click="confirmReport.dialog = true"
+        >
+          <v-icon left>mdi-file-document-check-outline</v-icon>
+          ยืนยันรายงาน
+        </v-btn>
       </div>
     </div>
 
+    <!-- Status & Action -->
     <v-row v-if="reportDetail" class="mt-2">
-      <v-col cols="12">
-        <div class="d-flex">
-          <v-spacer></v-spacer>
-          <v-btn
-            v-if="
-              reportDetail.report_status == 'approval' &&
-              accountId == reportDetail.checker_supervisor.account_id
-            "
-            color="success"
-            elevation="0"
-            large
-            block
-            @click="confirmReport.dialog = true"
-          >
-            <v-icon left>mdi-file-document-check-outline</v-icon>
-            ยืนยันรายงาน
-          </v-btn>
-          <!-- <v-btn
-            v-if="reportDetail.report_status == 'approved' && role != 'Checker'"
-            :loading="downloadPDFLoading"
-            color="primary"
-            outlined
-            large
-            @click="createPDF()"
-          >
-            <v-icon class="mr-2">mdi-file-star-outline</v-icon>
-            สร้างรายงาน (PDF)
-          </v-btn> -->
-        </div>
-      </v-col>
-      <v-col cols="12">
-        <div class="cp-header-2 cp-bold mb-4">
+      <v-col cols="12" class="d-lg-none">
+        <div class="cp-header-2 cp-bold">
           รายงานของ รายการตรวจที่
           {{ reportDetail.project_detail.inspection_no }}
+        </div>
+      </v-col>
+
+      <v-col cols="12">
+        <div class="d-flex align-center">
+          <v-chip
+            v-if="reportDetail.report_status == 'in-progress'"
+            label
+            color="warning"
+          >
+            กำลังดำเนินการ
+          </v-chip>
+          <v-spacer />
+          <v-btn
+            v-if="
+              role != 'Checker' && reportDetail.report_status == 'in-progress'
+            "
+            :loading="approvalReport.checkLoading"
+            color="primary"
+            elevation="0"
+            @click="onBeforeApprovalReport()"
+          >
+            <v-icon left>mdi-file-sign</v-icon>
+            ขอการยืนยันรางงาน
+          </v-btn>
+        </div>
+
+        <div v-if="reportDetail.report_status == 'approval'">
+          <div class="d-flex align-center">
+            <v-chip label color="info" class="mr-4">รอการยืนยัน</v-chip>
+
+            <v-btn
+              v-if="role == 'Admin' || role == 'Project Manager'"
+              outlined
+              elevation="0"
+              color="primary"
+              class="mr-4"
+              @click="cancelApproval.dialog = true"
+            >
+              <v-icon left>mdi-file-document-refresh-outline</v-icon>
+              ยกเลิก
+            </v-btn>
+          </div>
+          <v-card outlined class="mt-4 pa-4">
+            <div class="d-flex align-center">
+              <v-avatar size="40" color="primary">
+                <v-img
+                  v-if="reportDetail.checker_supervisor.avatar_path"
+                  :src="reportDetail.checker_supervisor.avatar_path"
+                />
+                <v-img v-else :src="require('@/assets/images/no-avatar.png')" />
+              </v-avatar>
+              <div class="ml-4">
+                <div class="cp-semibold cp-body">ผู้ยืนยันหลัก</div>
+                <div class="cp-caption cp-text-description truncate">
+                  ({{ reportDetail.checker_supervisor.code_name }})
+                  {{
+                    reportDetail.checker_supervisor.first_name +
+                    " " +
+                    reportDetail.checker_supervisor.last_name
+                  }}
+                </div>
+              </div>
+            </div>
+          </v-card>
+        </div>
+
+        <div v-else-if="reportDetail.report_status == 'approved'">
+          <div>
+            <v-card
+              color="success"
+              class="text-center pa-2 white--text cp-title"
+              flat
+            >
+              รายงานได้รับการยืนยัน
+            </v-card>
+            <v-card outlined class="mt-4 pa-4">
+              <div class="cp-semibold mb-2">ยืนยันโดย:</div>
+              <div class="d-flex align-center">
+                <v-avatar size="40" color="primary">
+                  <v-img
+                    v-if="reportDetail.approved_by.avatar_path"
+                    :src="reportDetail.approved_by.avatar_path"
+                  />
+                  <v-img
+                    v-else
+                    :src="require('@/assets/images/no-avatar.png')"
+                  />
+                </v-avatar>
+                <div class="ml-4">
+                  <div class="cp-caption truncate">
+                    <span class="cp-text-description">
+                      ({{ reportDetail.approved_by.code_name }})
+                      {{
+                        reportDetail.approved_by.first_name +
+                        " " +
+                        reportDetail.approved_by.last_name
+                      }}
+                    </span>
+                  </div>
+                  <div class="cp-caption cp-text-description">
+                    <v-icon small>mdi-calendar-clock-outline</v-icon>
+                    {{ formatDate(reportDetail.approved_at) }}
+                  </div>
+                </div>
+              </div>
+            </v-card>
+          </div>
         </div>
       </v-col>
     </v-row>
 
     <!-- Page Header -->
-    <cp-card class="page-a4">
+    <cp-card class="pa-4 mt-6">
       <v-img :src="require('@/assets/images/header-page.png')" width="100%" />
 
       <div class="my-6">
@@ -155,128 +201,124 @@
       </div>
 
       <!-- Project Detail -->
-      <v-row>
-        <v-col cols="12">
-          <div class="detail-title">ข้อมูล โปรเจค</div>
-          <div class="detail-label">
-            <div class="detail-key">ชื่อโปรเจค</div>
-            <div class="detail-value">
-              {{ reportDetail.project_detail.project_name }}
-            </div>
+      <div class="mt-4">
+        <div class="detail-title mb-2">ข้อมูล โปรเจค</div>
+        <div class="detail-label">
+          <div class="detail-key">ชื่อโปรเจค</div>
+          <div class="detail-value">
+            {{ reportDetail.project_detail.project_name }}
           </div>
-          <div class="detail-label">
-            <div class="detail-key">ตรวจรอบที่</div>
-            <div class="detail-value">
-              {{ reportDetail.project_detail.inspection_no }}
-            </div>
+        </div>
+        <div class="detail-label">
+          <div class="detail-key">ตรวจรอบที่</div>
+          <div class="detail-value">
+            {{ reportDetail.project_detail.inspection_no }}
           </div>
-          <div class="detail-label">
-            <div class="detail-key">วันที่เข้าตรวจ</div>
-            <div class="detail-value">
-              {{ formatDate(reportDetail.project_detail.working_date) }}
-            </div>
+        </div>
+        <div class="detail-label">
+          <div class="detail-key">วันที่เข้าตรวจ</div>
+          <div class="detail-value">
+            {{ formatDate(reportDetail.project_detail.working_date) }}
           </div>
-        </v-col>
-        <v-col cols="12">
-          <div class="detail-title">ข้อมูล ลูกค้า</div>
-          <div class="detail-label">
-            <div class="detail-key">ชื่อ</div>
-            <div class="detail-value">
-              {{ reportDetail.customer_detail.name }}
-            </div>
+        </div>
+      </div>
+      <div class="mt-4">
+        <div class="detail-title mb-2">ข้อมูล ลูกค้า</div>
+        <div class="detail-label">
+          <div class="detail-key">ชื่อ</div>
+          <div class="detail-value">
+            {{ reportDetail.customer_detail.name }}
           </div>
-          <div class="detail-label">
-            <div class="detail-key">เบอร์โทร</div>
-            <div class="detail-value">
-              {{
-                reportDetail.customer_detail.phone
-                  ? formatPhoneNumber(reportDetail.customer_detail.phone)
-                  : "-"
-              }}
-            </div>
+        </div>
+        <div class="detail-label">
+          <div class="detail-key">เบอร์โทร</div>
+          <div class="detail-value">
+            {{
+              reportDetail.customer_detail.phone
+                ? formatPhoneNumber(reportDetail.customer_detail.phone)
+                : "-"
+            }}
           </div>
-          <div class="detail-label">
-            <div class="detail-key">อีเมล</div>
-            <div class="detail-value">
-              {{ reportDetail.customer_detail.email || "-" }}
-            </div>
+        </div>
+        <div class="detail-label">
+          <div class="detail-key">อีเมล</div>
+          <div class="detail-value">
+            {{ reportDetail.customer_detail.email || "-" }}
           </div>
-        </v-col>
-      </v-row>
+        </div>
+      </div>
 
-      <v-row>
-        <v-col cols="12">
-          <div class="detail-title">
-            ข้อมูล {{ reportDetail.type_detail.project_type }}
+      <div class="mt-4">
+        <div class="detail-title mb-2">
+          ข้อมูล {{ reportDetail.type_detail.project_type }}
+        </div>
+        <div class="detail-label">
+          <div class="detail-key">ประเภท</div>
+          <div class="detail-value">
+            {{ reportDetail.type_detail.project_type }}
           </div>
-          <div class="detail-label">
-            <div class="detail-key">ประเภท</div>
-            <div class="detail-value">
-              {{ reportDetail.type_detail.project_type }}
-            </div>
+        </div>
+        <div class="detail-label">
+          <div class="detail-key">เลขที่</div>
+          <div class="detail-value">
+            {{ reportDetail.type_detail.type_address || "-" }}
           </div>
-          <div class="detail-label">
-            <div class="detail-key">เลขที่</div>
-            <div class="detail-value">
-              {{ reportDetail.type_detail.type_address || "-" }}
-            </div>
+        </div>
+        <div class="detail-label">
+          <div class="detail-key">พื้นที่ใช้สอย</div>
+          <div class="detail-value">
+            <span v-if="reportDetail.type_detail.type_usable_area">
+              {{ reportDetail.type_detail.type_usable_area }} ตร.ม.
+            </span>
+            <span v-else>-</span>
           </div>
-          <div class="detail-label">
-            <div class="detail-key">พื้นที่ใช้สอย</div>
-            <div class="detail-value">
-              <span v-if="reportDetail.type_detail.type_usable_area">
-                {{ reportDetail.type_detail.type_usable_area }} ตร.ม.
-              </span>
-              <span v-else>-</span>
-            </div>
+        </div>
+      </div>
+      <div class="mt-4">
+        <div class="detail-title mb-2">ข้อมูล เจ้าหน้าที่โครงการ</div>
+        <div class="detail-label">
+          <div class="detail-key">ชื่อ</div>
+          <div class="detail-value">
+            {{ reportDetail.coordinator_detail.name }}
           </div>
-        </v-col>
-        <v-col cols="12">
-          <div class="detail-title">ข้อมูล เจ้าหน้าที่โครงการ</div>
-          <div class="detail-label">
-            <div class="detail-key">ชื่อ</div>
-            <div class="detail-value">
-              {{ reportDetail.coordinator_detail.name }}
-            </div>
+        </div>
+        <div class="detail-label">
+          <div class="detail-key">เบอร์โทร</div>
+          <div class="detail-value">
+            {{
+              reportDetail.coordinator_detail.phone
+                ? formatPhoneNumber(reportDetail.coordinator_detail.phone)
+                : "-"
+            }}
           </div>
-          <div class="detail-label">
-            <div class="detail-key">เบอร์โทร</div>
-            <div class="detail-value">
-              {{
-                reportDetail.coordinator_detail.phone
-                  ? formatPhoneNumber(reportDetail.coordinator_detail.phone)
-                  : "-"
-              }}
-            </div>
+        </div>
+        <div class="detail-label">
+          <div class="detail-key">อีเมล</div>
+          <div class="detail-value">
+            {{ reportDetail.coordinator_detail.email || "-" }}
           </div>
-          <div class="detail-label">
-            <div class="detail-key">อีเมล</div>
-            <div class="detail-value">
-              {{ reportDetail.coordinator_detail.email || "-" }}
-            </div>
-          </div>
-        </v-col>
-      </v-row>
+        </div>
+      </div>
     </cp-card>
 
     <!-- Page Plan -->
-    <cp-card class="page-a4 mt-6">
+    <cp-card class="pa-4 mt-6">
       <div class="detail-title">แปลน</div>
       <div class="detail-plan">
-        <div v-if="!projectFile.plan1" class="text-center pt-6">
+        <div v-if="!projectFile.plan1" class="text-center pt-4">
           <div class="cp-title cp-text-description">ไม่มีข้อมูลแปลน</div>
         </div>
         <v-row v-else>
-          <v-col cols="12">
+          <v-col v-if="projectFile.plan1" cols="12" lg="6" md="12">
             <v-img :src="projectFile.plan1" width="100%" contain />
           </v-col>
-          <v-col cols="12">
+          <v-col v-if="projectFile.plan2" cols="12" lg="6" md="12">
             <v-img :src="projectFile.plan2" width="100%" contain />
           </v-col>
-          <v-col cols="12">
+          <v-col v-if="projectFile.plan3" cols="12" lg="6" md="12">
             <v-img :src="projectFile.plan3" width="100%" contain />
           </v-col>
-          <v-col cols="12">
+          <v-col v-if="projectFile.plan4" cols="12" lg="6" md="12">
             <v-img :src="projectFile.plan4" width="100%" contain />
           </v-col>
         </v-row>
@@ -284,7 +326,7 @@
     </cp-card>
 
     <!-- Page Note -->
-    <cp-card class="page-a4 mt-6">
+    <cp-card class="pa-4 mt-6">
       <div class="detail-title mb-6">
         <span class="error--text">หมายเหตุ</span>
       </div>
@@ -314,7 +356,7 @@
     </cp-card>
 
     <!-- Page Location -->
-    <cp-card class="page-a4 mt-6">
+    <cp-card class="pa-4 mt-6">
       <div v-if="locationList.length == 0" class="no-deflect">
         Location ยังไม่มี Deflect
       </div>
@@ -330,24 +372,29 @@
               v-for="(deflectItem, indexDeflect) in list.deflect_list"
               :key="indexDeflect + 'List'"
               cols="12"
+              lg="6"
+              md="6"
+              sm="12"
             >
               <div v-if="!deflectItem.image_path" class="deflect-card-no">
                 ไม่มี Deflect
               </div>
               <div v-else class="deflect-card">
-                <v-img
-                  :src="deflectItem.image_path"
-                  aspect-ratio="1.4"
-                  class="mb-4"
-                >
-                </v-img>
+                <v-sheet width="100%" class="grey lighten-2 mb-4">
+                  <v-img
+                    :src="deflectItem.image_path"
+                    aspect-ratio="1.4"
+                    contain
+                  >
+                  </v-img>
+                </v-sheet>
 
                 <div
                   v-if="deflectItem.deflect_status == null"
                   class="box-status-wait"
                 >
                   <v-icon class="wait-icon">mdi-home-search-outline</v-icon>
-                  รอแอดมินตรวจบันทึกสถานะ
+                  รอตรวจสอบสถานะ
                 </div>
                 <div v-else>
                   <div
@@ -355,15 +402,11 @@
                     class="box-status-only"
                   >
                     <div class="status-pass">
-                      <v-icon color="success" large>
-                        mdi-checkbox-outline
-                      </v-icon>
+                      <v-icon color="success"> mdi-checkbox-outline </v-icon>
                       <span class="success--text"> ผ่าน </span>
                     </div>
                     <div class="status">
-                      <v-icon large color="grey">
-                        mdi-checkbox-blank-outline
-                      </v-icon>
+                      <v-icon color="grey"> mdi-checkbox-blank-outline </v-icon>
                       <span class="grey--text"> ไม่ผ่าน </span>
                     </div>
                   </div>
@@ -372,15 +415,11 @@
                     class="box-status-only"
                   >
                     <div class="status">
-                      <v-icon color="grey" large>
-                        mdi-checkbox-blank-outline
-                      </v-icon>
+                      <v-icon color="grey"> mdi-checkbox-blank-outline </v-icon>
                       <span class="grey--text"> ผ่าน </span>
                     </div>
                     <div class="status-not-pass">
-                      <v-icon large color="error">
-                        mdi-close-box-outline
-                      </v-icon>
+                      <v-icon color="error"> mdi-close-box-outline </v-icon>
                       <span class="error--text"> ไม่ผ่าน </span>
                     </div>
                   </div>
@@ -398,7 +437,7 @@
                 <v-divider class="my-4" />
 
                 <div>
-                  <cp-label>ลงข้อมูลโดย</cp-label>
+                  <cp-label>สร้าง Deflect โดย</cp-label>
                   <div class="d-flex align-center">
                     <v-avatar size="40" color="primary">
                       <img
@@ -423,6 +462,38 @@
                         <v-icon small>mdi-calendar-clock-outline</v-icon>
                         <span class="cp-text-description">{{
                           formatDateMax(deflectItem.created_at)
+                        }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div v-if="deflectItem.deflect_status != null">
+                  <v-divider class="my-4" />
+                  <cp-label>บันทึกสถานะโดย</cp-label>
+                  <div class="d-flex align-center">
+                    <v-avatar size="40" color="primary">
+                      <img
+                        v-if="deflectItem.update_status_by.avatar_path"
+                        :src="deflectItem.update_status_by.avatar_path"
+                      />
+                      <v-img
+                        v-else
+                        :src="require('@/assets/images/no-avatar.png')"
+                      />
+                    </v-avatar>
+                    <div class="ml-4">
+                      <div class="cp-semibold">
+                        ({{ deflectItem.update_status_by.code_name }})
+                        {{
+                          deflectItem.update_status_by.first_name +
+                          " " +
+                          deflectItem.update_status_by.last_name
+                        }}
+                      </div>
+                      <div>
+                        <v-icon small>mdi-calendar-clock-outline</v-icon>
+                        <span class="cp-text-description">{{
+                          formatDateMax(deflectItem.update_status_at)
                         }}</span>
                       </div>
                     </div>
@@ -436,7 +507,7 @@
     </cp-card>
 
     <!-- Page System -->
-    <cp-card class="page-a4 mt-6">
+    <cp-card class="pa-4 mt-6">
       <div v-if="systemList.length == 0" class="no-deflect">
         System ยังไม่มี Deflect
       </div>
@@ -450,23 +521,24 @@
               v-for="(deflectItem, indexDeflect) in list.deflect_list"
               :key="indexDeflect + 'List'"
               cols="12"
+              lg="6"
+              md="6"
+              sm="12"
             >
               <div v-if="!deflectItem.image_path" class="deflect-card-no">
                 ไม่มี Deflect
               </div>
               <div v-else class="deflect-card">
-                <v-img
-                  :src="deflectItem.image_path"
-                  aspect-ratio="1.4"
-                  class="mb-4"
-                >
-                </v-img>
+                <v-sheet width="100%" class="grey lighten-2 mb-4">
+                  <v-img :src="deflectItem.image_path" aspect-ratio="1.4">
+                  </v-img>
+                </v-sheet>
                 <div
                   v-if="deflectItem.deflect_status == null"
                   class="box-status-wait"
                 >
                   <v-icon class="wait-icon">mdi-home-search-outline</v-icon>
-                  รอทีมตรวจบันทึกสถานะ
+                  รอตรวจสอบสถานะ
                 </div>
                 <div v-else>
                   <div
@@ -474,15 +546,11 @@
                     class="box-status-only"
                   >
                     <div class="status-pass">
-                      <v-icon color="success" large>
-                        mdi-checkbox-outline
-                      </v-icon>
+                      <v-icon color="success"> mdi-checkbox-outline </v-icon>
                       <span class="success--text"> ผ่าน </span>
                     </div>
                     <div class="status">
-                      <v-icon large color="grey">
-                        mdi-checkbox-blank-outline
-                      </v-icon>
+                      <v-icon color="grey"> mdi-checkbox-blank-outline </v-icon>
                       <span class="grey--text"> ไม่ผ่าน </span>
                     </div>
                   </div>
@@ -491,15 +559,11 @@
                     class="box-status-only"
                   >
                     <div class="status">
-                      <v-icon color="grey" large>
-                        mdi-checkbox-blank-outline
-                      </v-icon>
+                      <v-icon color="grey"> mdi-checkbox-blank-outline </v-icon>
                       <span class="grey--text"> ผ่าน </span>
                     </div>
                     <div class="status-not-pass">
-                      <v-icon large color="error">
-                        mdi-close-box-outline
-                      </v-icon>
+                      <v-icon color="error"> mdi-close-box-outline </v-icon>
                       <span class="error--text"> ไม่ผ่าน </span>
                     </div>
                   </div>
@@ -517,7 +581,7 @@
                 <v-divider class="my-4" />
 
                 <div>
-                  <cp-label>ลงข้อมูลโดย</cp-label>
+                  <cp-label>สร้าง Deflect โดย</cp-label>
                   <div class="d-flex align-center">
                     <v-avatar size="40" color="primary">
                       <img
@@ -547,6 +611,38 @@
                     </div>
                   </div>
                 </div>
+                <div v-if="deflectItem.deflect_status != null">
+                  <v-divider class="my-4" />
+                  <cp-label>บันทึกสถานะโดย</cp-label>
+                  <div class="d-flex align-center">
+                    <v-avatar size="40" color="primary">
+                      <img
+                        v-if="deflectItem.update_status_by.avatar_path"
+                        :src="deflectItem.update_status_by.avatar_path"
+                      />
+                      <v-img
+                        v-else
+                        :src="require('@/assets/images/no-avatar.png')"
+                      />
+                    </v-avatar>
+                    <div class="ml-4">
+                      <div class="cp-semibold">
+                        ({{ deflectItem.update_status_by.code_name }})
+                        {{
+                          deflectItem.update_status_by.first_name +
+                          " " +
+                          deflectItem.update_status_by.last_name
+                        }}
+                      </div>
+                      <div>
+                        <v-icon small>mdi-calendar-clock-outline</v-icon>
+                        <span class="cp-text-description">{{
+                          formatDateMax(deflectItem.update_status_at)
+                        }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </v-col>
           </v-row>
@@ -554,7 +650,8 @@
       </div>
     </cp-card>
 
-    <!-- Delete Team Checker -->
+    <!-- Modal -->
+    <!-- Delete Note -->
     <v-dialog
       v-model="deleteNoteGroup.dialog"
       :persistent="deleteNoteGroup.loading"
@@ -582,7 +679,7 @@
             <v-btn
               :loading="deleteNoteGroup.loading"
               elevation="0"
-              height="42"
+              height="36"
               color="error"
               @click="onDeleteNoteGroup()"
             >
@@ -621,7 +718,7 @@
             <v-btn
               :loading="deleteReport.loading"
               elevation="0"
-              height="42"
+              height="36"
               color="error"
               @click="onDeleteReport()"
             >
@@ -659,7 +756,7 @@
             <div class="warning--text pb-4">
               การขอยืนยันจะทำให้ไม่สามารถแก้ไขข้อมูลทั้งหมดที่เกี่ยวข้องกับโปรเจคนี้ได้อีก
             </div>
-            <cp-label>หัวหน้าทีมตรวจของโปรเจค</cp-label>
+            <cp-label>หัวหน้าทีมตรวจของรายการตรวจนี้</cp-label>
             <v-card outlined class="pa-2">
               <div class="d-flex align-center">
                 <v-avatar size="55" color="primary">
@@ -691,7 +788,7 @@
             <v-btn
               :loading="approvalReport.loading"
               elevation="0"
-              height="42"
+              height="36"
               color="primary"
               @click="onConfirmReportApproval()"
             >
@@ -702,7 +799,7 @@
       </v-card>
     </v-dialog>
 
-    <!-- Report Approval -->
+    <!-- Cancel Report Approval -->
     <v-dialog
       v-model="cancelApproval.dialog"
       :persistent="cancelApproval.loading"
@@ -730,7 +827,7 @@
             <v-btn
               :loading="cancelApproval.loading"
               elevation="0"
-              height="42"
+              height="36"
               color="primary"
               @click="onCancelReportApproval()"
             >
@@ -769,7 +866,7 @@
             <v-btn
               :loading="confirmReport.loading"
               elevation="0"
-              height="42"
+              height="36"
               color="primary"
               @click="onConfirmReportApproved()"
             >
@@ -931,8 +1028,9 @@ export default {
               notifyValue: true,
               type: "error",
               title: "เกิดข้อผิดพลาด",
-              message: response.data.data,
+              message: "ไม่มีรายการ รายงานนี้แล้ว",
             });
+            this.$router.push("/projects/reports");
           });
       }
     },
@@ -1019,7 +1117,8 @@ export default {
               notifyValue: true,
               type: "error",
               title: "เกิดข้อผิดพลาด",
-              message: response.data.data,
+              message:
+                "ไม่พบข้อมูลรายงานนี้ อาจมีผู้ใช้งานท่านอื่นลบรายการตรวจแล้ว",
             });
           });
       }
@@ -1080,7 +1179,8 @@ export default {
                 notifyValue: true,
                 type: "error",
                 title: "เกิดข้อผิดพลาด",
-                message: response.data.data,
+                message:
+                  "ไม่พบข้อมูลรายงานนี้ อาจมีผู้ใช้งานท่านอื่นลบรายการตรวจแล้ว",
               });
             });
         }
@@ -1167,9 +1267,9 @@ export default {
               notifyValue: true,
               type: "error",
               title: "เกิดข้อผิดพลาด",
-              message: response,
+              message:
+                "ไม่พบข้อมูลรายงานนี้ อาจมีผู้ใช้งานท่านอื่นลบรายการตรวจแล้ว",
             });
-            throw response;
           }
         }
       }
@@ -1206,8 +1306,10 @@ export default {
               notifyValue: true,
               type: "error",
               title: "เกิดข้อผิดพลาด",
-              message: response,
+              message:
+                "ไม่พบข้อมูลรายงานนี้อาจมีผู้ใช้งานท่านอื่นลบรายการตรวจแล้ว",
             });
+            this.approvalReport.checkLoading = false;
           });
       }
     },
@@ -1245,45 +1347,6 @@ export default {
               type: "error",
               title: "เกิดข้อผิดพลาด",
               message: response.data.data,
-            });
-          });
-      }
-    },
-
-    async onUpdateDeflectStatus(imageId, loactionId, status, statusNow) {
-      const accessToken = await this.getAccessToken();
-      if (accessToken && status !== statusNow) {
-        this.$axios
-          .post(
-            `${process.env.API_ENDPOINT}/v1/project/inspection/location/deflect/status`,
-            {
-              project_id: this.reportDetail.project_id,
-              inspection_id: this.reportDetail.inspection_id,
-              location_id: loactionId,
-              image_id: imageId,
-              deflect_status: status,
-            },
-            {
-              headers: {
-                Authorization: `Bearer ${accessToken}`,
-              },
-            }
-          )
-          .then(({ data }) => {
-            this.onNotify({
-              notifyValue: true,
-              type: "success",
-              title: "การดำเนินสำเร็จ",
-              message: "สถานะของ Deflect ถูกเปลี่ยนแล้ว",
-            });
-            this.onGetLocationList();
-          })
-          .catch((error) => {
-            this.onNotify({
-              notifyValue: true,
-              type: "error",
-              title: "ดำเนินการไม่สำเร็จ",
-              message: error,
             });
           });
       }
@@ -1397,7 +1460,8 @@ export default {
               notifyValue: true,
               type: "error",
               title: "เกิดข้อผิดพลาด",
-              message: response,
+              message:
+                "ไม่พบข้อมูลรายงานนี้ อาจมีผู้ใช้งานท่านอื่นลบรายการตรวจแล้ว",
             });
           });
       }
@@ -1432,7 +1496,8 @@ export default {
               notifyValue: true,
               type: "error",
               title: "เกิดข้อผิดพลาด",
-              message: response,
+              message:
+                "ไม่พบข้อมูลรายงานนี้ อาจมีผู้ใช้งานท่านอื่นลบรายการตรวจแล้ว",
             });
           });
       }
@@ -1467,20 +1532,21 @@ export default {
               notifyValue: true,
               type: "error",
               title: "เกิดข้อผิดพลาด",
-              message: response,
+              message:
+                "ไม่พบข้อมูลรายงานนี้ อาจมีผู้ใช้งานท่านอื่นลบรายการตรวจแล้ว",
             });
           });
       }
     },
 
-    async getImageBase64(imagePath) {
-      const accessToken = await this.getAccessToken();
+    async getImageBase64(accessToken, imagePath) {
       if (accessToken) {
         try {
           const response = await this.$axios.post(
             `${process.env.API_ENDPOINT}/v1/project/inspection/report/image-64`,
             {
               image_path: imagePath,
+              page_focus: "report",
             },
             {
               headers: {
@@ -1500,80 +1566,90 @@ export default {
       }
     },
 
-    createPDF() {
-      this.downloadPDFLoading = true;
-      const pdfPageDetail = [
-        {
-          page: 1,
-          mainImage: this.projectFile.main,
-          projectDetail: this.reportDetail.project_detail,
-          typeDetail: this.reportDetail.type_detail,
-          customerDetail: this.reportDetail.customer_detail,
-          coordinatorDetail: this.reportDetail.coordinator_detail,
-        },
-      ];
+    async createPDF() {
+      const accessToken = await this.getAccessToken();
+      if (accessToken) {
+        this.downloadPDFLoading = true;
+        const pdfPageDetail = [
+          {
+            page: 1,
+            mainImage: this.projectFile.main,
+            projectDetail: this.reportDetail.project_detail,
+            typeDetail: this.reportDetail.type_detail,
+            customerDetail: this.reportDetail.customer_detail,
+            coordinatorDetail: this.reportDetail.coordinator_detail,
+          },
+        ];
 
-      const planList = [
-        this.projectFile.plan1,
-        this.projectFile.plan2,
-        this.projectFile.plan3,
-        this.projectFile.plan4,
-      ].filter(Boolean);
+        const planList = [
+          this.projectFile.plan1,
+          this.projectFile.plan2,
+          this.projectFile.plan3,
+          this.projectFile.plan4,
+        ].filter(Boolean);
 
-      planList.forEach((plan, index) => {
-        const pageNumber = Math.floor(index / 2) + 2;
-        const planNumber = index + 1;
+        planList.forEach((plan, index) => {
+          const pageNumber = Math.floor(index / 2) + 2;
+          const planNumber = index + 1;
 
-        pdfPageDetail[pageNumber - 1] = pdfPageDetail[pageNumber - 1] || {
-          page: pageNumber,
-        };
-        pdfPageDetail[pageNumber - 1][`plan${planNumber}`] = {
-          plan: planNumber,
-          image: plan,
-        };
-      });
+          pdfPageDetail[pageNumber - 1] = pdfPageDetail[pageNumber - 1] || {
+            page: pageNumber,
+          };
+          pdfPageDetail[pageNumber - 1][`plan${planNumber}`] = {
+            plan: planNumber,
+            image: plan,
+          };
+        });
 
-      const noteDataGroup = this.noteGroupList.map((e) => ({
-        title: e.report_title,
-        noteList: e.note_list.map((x) => ({
-          listMessage: x.list_message,
-        })),
-      }));
+        const noteDataGroup = this.noteGroupList.map((e) => ({
+          title: e.report_title,
+          noteList: e.note_list.map((x) => ({
+            listMessage: x.list_message,
+          })),
+        }));
 
-      const filterKeys = ["image_path", "deflect_status", "deflect_detail"];
-      const filterDeflectList = (list) =>
-        list.map((deflect) =>
-          Object.fromEntries(
-            Object.entries(deflect).filter(([key]) => filterKeys.includes(key))
-          )
+        const filterKeys = ["image_path", "deflect_status", "deflect_detail"];
+        const filterDeflectList = (list) =>
+          list.map((deflect) =>
+            Object.fromEntries(
+              Object.entries(deflect).filter(([key]) =>
+                filterKeys.includes(key)
+              )
+            )
+          );
+
+        const filteredLocationSetup = this.locationList.map((e) => ({
+          locationName: e.location_name,
+          deflectList: filterDeflectList(e.deflect_list),
+        }));
+
+        const filteredSystemSetup = this.systemList.map((e) => ({
+          systemName: e.system_name,
+          deflectList: filterDeflectList(e.deflect_list),
+        }));
+
+        this.setupImage(
+          accessToken,
+          pdfPageDetail,
+          noteDataGroup,
+          filteredLocationSetup,
+          filteredSystemSetup
         );
-
-      const filteredLocationSetup = this.locationList.map((e) => ({
-        locationName: e.location_name,
-        deflectList: filterDeflectList(e.deflect_list),
-      }));
-
-      const filteredSystemSetup = this.systemList.map((e) => ({
-        systemName: e.system_name,
-        deflectList: filterDeflectList(e.deflect_list),
-      }));
-
-      this.setupImage(
-        pdfPageDetail,
-        noteDataGroup,
-        filteredLocationSetup,
-        filteredSystemSetup
-      );
+      }
     },
 
     async setupImage(
+      accessToken,
       pdfPageDetail,
       noteDataGroup,
       filteredLocationSetup,
       filteredSystemSetup
     ) {
       // Setup Main Image
-      const mainImage = await this.getImageBase64(pdfPageDetail[0].mainImage);
+      const mainImage = await this.getImageBase64(
+        accessToken,
+        pdfPageDetail[0].mainImage
+      );
       this.convertBase64To16by9(mainImage.image, (resultBase64) => {
         pdfPageDetail[0].mainImage = {
           image: resultBase64,
@@ -1586,6 +1662,7 @@ export default {
       if (pdfPageDetail[1]) {
         if (pdfPageDetail[1].plan1) {
           const plan1Data = await this.getImageBase64(
+            accessToken,
             pdfPageDetail[1].plan1.image
           );
           pdfPageDetail[1].plan1.image = plan1Data.image;
@@ -1595,6 +1672,7 @@ export default {
 
         if (pdfPageDetail[1].plan2) {
           const plan2Data = await this.getImageBase64(
+            accessToken,
             pdfPageDetail[1].plan2.image
           );
           pdfPageDetail[1].plan2.image = plan2Data.image;
@@ -1606,6 +1684,7 @@ export default {
       if (pdfPageDetail[2]) {
         if (pdfPageDetail[2].plan3) {
           const plan3Data = await this.getImageBase64(
+            accessToken,
             pdfPageDetail[2].plan3.image
           );
           pdfPageDetail[2].plan3.image = plan3Data.image;
@@ -1614,6 +1693,7 @@ export default {
         }
         if (pdfPageDetail[2].plan4) {
           const plan4Data = await this.getImageBase64(
+            accessToken,
             pdfPageDetail[2].plan4.image
           );
           pdfPageDetail[2].plan4.image = plan4Data.image;
@@ -1624,7 +1704,10 @@ export default {
 
       // Setup Location Deflect Image
       const updateLocationImage = async (deflectListItem) => {
-        const imageData = await this.getImageBase64(deflectListItem.image_path);
+        const imageData = await this.getImageBase64(
+          accessToken,
+          deflectListItem.image_path
+        );
         deflectListItem.image_path = imageData.image;
         return deflectListItem;
       };
@@ -1643,7 +1726,10 @@ export default {
 
       // Setup System Deflect Image
       const updateSystemImage = async (deflectListItem) => {
-        const imageData = await this.getImageBase64(deflectListItem.image_path);
+        const imageData = await this.getImageBase64(
+          accessToken,
+          deflectListItem.image_path
+        );
         deflectListItem.image_path = imageData.image;
         return deflectListItem;
       };
@@ -1947,12 +2033,13 @@ export default {
       } else {
         pdfDoc.rect(x + 4, y + 4, 80, 50);
       }
-      if (status === "1") {
+      const intStatus = parseInt(status, 10);
+      if (intStatus === 1) {
         const statusPassActive = require("@/assets/images/pass-active.jpg");
         pdfDoc.addImage(statusPassActive, "JPG", x + 4, y + 57, 37.5, 8);
         const statusNotPass = require("@/assets/images/not-pass.jpg");
         pdfDoc.addImage(statusNotPass, "JPG", x + 46.5, y + 57, 37.5, 8);
-      } else if (status === "0") {
+      } else if (intStatus === 0) {
         const statusPass = require("@/assets/images/pass.jpg");
         pdfDoc.addImage(statusPass, "JPG", x + 4, y + 57, 37.5, 8);
         const statusNotPassActive = require("@/assets/images/not-pass-active.jpg");
@@ -2435,7 +2522,10 @@ export default {
       });
 
       this.downloadPDFLoading = false;
-      const fileName = "property-plus-report" + Date.now();
+      const fileName = this.reportDetail.project_detail.project_name.replace(
+        /\s/g,
+        "-"
+      );
       pdfDoc.save(`${fileName}.pdf`);
     },
   },
@@ -2450,10 +2540,10 @@ export default {
   max-width: 250px;
 }
 .page-a4 {
-  padding: 16px;
+  padding: 80px;
 }
 .page-box {
-  margin-left: 8px;
+  margin-left: 24px;
 }
 .page-header {
   font-size: 60px;
@@ -2467,7 +2557,7 @@ export default {
 .page-contact {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
   color: #676268;
   font-size: 30px;
   font-weight: 700;
@@ -2478,7 +2568,7 @@ export default {
 .cp-flex {
   display: flex;
   gap: 100px;
-  margin: 24px 0;
+  margin: 50px 0;
 }
 
 .cp-col {
@@ -2496,14 +2586,14 @@ export default {
   font-size: 18px;
   font-weight: 700;
   color: var(--base-primary);
-  padding: 8px 0;
+  padding: 12px 0;
   border-top: 1px solid #d9d9d9;
   border-bottom: 1px solid #d9d9d9;
 }
 .detail-label {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
   font-size: 18px;
   padding: 8px 0;
 }
@@ -2516,10 +2606,9 @@ export default {
   color: #676268;
 }
 .detail-plan {
-  border-radius: 8px;
   border: 1px solid #d9d9d9;
   padding: 8px;
-  margin: 12px 0;
+  margin: 24px 0;
 }
 .cp-icon-delete {
   transition: all ease 0.3s;
@@ -2532,19 +2621,10 @@ export default {
 .added-report-note {
   position: relative;
   width: 100%;
-  border-radius: 8px;
   border: 2px solid #ececec;
   padding: 12px;
-  margin: 8px 0;
+  margin: 16px 0;
   cursor: default;
-  transition: all ease 0.3s;
-}
-.added-report-note:hover {
-  border: 2px solid var(--base-primary);
-}
-.added-report-note:hover .footer-action {
-  padding-top: 16px;
-  opacity: 1;
 }
 .footer-action {
   opacity: 0;
@@ -2574,10 +2654,9 @@ export default {
 /* Add */
 .add-report-note {
   width: 100%;
-  border-radius: 8px;
   border: 2px dashed #ececec;
-  padding: 16px;
-  margin: 8px 0;
+  padding: 24px;
+  margin: 16px 0;
   transition: all ease 0.3s;
 }
 .add-report-note:hover {
@@ -2589,7 +2668,6 @@ export default {
   justify-content: center;
   width: 100%;
   height: 56px;
-  border-radius: 4px;
   cursor: default;
   color: var(--gray-300);
   border: 1px dashed var(--base-border);
@@ -2603,7 +2681,6 @@ export default {
   justify-content: center;
   width: 100%;
   height: 56px;
-  border-radius: 4px;
   cursor: pointer;
   color: var(--gray-300);
   border: 1px dashed var(--base-border);
@@ -2631,7 +2708,6 @@ export default {
   width: 100%;
   height: 300px;
   padding: 24px;
-  border-radius: 12px;
   color: var(--gray-400);
   font-size: 18px;
   font-weight: 600;
@@ -2640,7 +2716,6 @@ export default {
 }
 .deflect-card {
   padding: 12px;
-  border-radius: 8px;
   border: 1px solid var(--gray-100);
 }
 .box-status {
@@ -2659,7 +2734,6 @@ export default {
   justify-content: center;
   gap: 8px;
   height: 50px;
-  border-radius: 8px;
   background-color: var(--gray-opacity-1);
   cursor: pointer;
   transition: all ease 0.3s;
@@ -2695,7 +2769,6 @@ export default {
   justify-content: center;
   gap: 8px;
   height: 50px;
-  border-radius: 8px;
   background-color: var(--gray-opacity-1);
 }
 .box-status-only .status-pass {
@@ -2706,7 +2779,6 @@ export default {
   justify-content: center;
   gap: 8px;
   height: 50px;
-  border-radius: 8px;
   background-color: var(--green-100);
 }
 .box-status-only .status-not-pass {
@@ -2717,7 +2789,6 @@ export default {
   justify-content: center;
   gap: 8px;
   height: 50px;
-  border-radius: 8px;
   background-color: var(--red-100);
 }
 
@@ -2729,7 +2800,6 @@ export default {
   justify-content: center;
   gap: 8px;
   height: 50px;
-  border-radius: 8px;
   background-color: var(--orange-opacity-1);
   border: 1px solid var(--orange-500);
   color: var(--orange-600);
@@ -2747,7 +2817,6 @@ export default {
   font-weight: 600;
   width: 100%;
   height: 200px;
-  border-radius: 12px;
   border: 1px solid var(--gray-300);
   background-color: var(--gray-opacity-1);
 }

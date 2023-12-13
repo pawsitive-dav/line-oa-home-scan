@@ -2,25 +2,32 @@
 <!-- eslint-disable vue/valid-v-slot -->
 <template>
   <div>
-    <div class="d-flex cp-text-description cp-subtitle cp-medium">
-      <span v-if="!inspectionDetail" class="mx-1 cp-text-disable">...</span>
-      <span
-        v-else
-        class="mx-1"
+    <div class="d-flex align-center cp-text-description cp-body cp-medium">
+      <div
+        v-if="inspectionDetail"
         @click="
           $router.push(
             `/projects/list/detail?id=${inspectionDetail.project_id}`
           )
         "
       >
-        <cp-link> <v-icon>mdi-chevron-left</v-icon> ย้อนกลับ </cp-link>
-      </span>
+        <v-icon>mdi-chevron-left</v-icon>
+        ย้อนกลับ
+      </div>
     </div>
 
     <v-row v-if="!inspectionDetail" class="mt-4">
       <v-col cols="12">
-        <v-sheet color="grey lighten-2" width="150" height="30" />
-        <v-sheet color="grey lighten-2" width="50" height="30" class="mt-4" />
+        <div class="d-flex">
+          <v-sheet color="grey lighten-2" width="300" height="30" />
+          <v-sheet
+            color="grey lighten-2"
+            width="100"
+            height="30"
+            class="ml-4"
+          />
+        </div>
+        <v-sheet color="grey lighten-2" width="100%" height="20" class="mt-4" />
         <v-card
           flat
           width="100%"
@@ -31,14 +38,14 @@
         </v-card>
       </v-col>
     </v-row>
-
     <v-row class="mt-2">
       <v-col v-if="inspectionDetail" cols="12">
-        <div class="d-flex align-center cp-header-2 cp-bold mb-2">
-          <div class="mr-2">
+        <div class="mb-2">
+          <div class="cp-header-2 cp-bold">
             <span>รายการตรวจที่</span>
             {{ inspectionDetail.inspection_no }}
-
+          </div>
+          <div>
             <v-chip label>
               วันที่ตรวจสอบ: {{ formatDate(inspectionDetail.working_date) }}
             </v-chip>
@@ -46,31 +53,11 @@
             <v-chip
               v-if="inspectionDetail.report_status == 'approval'"
               color="info"
+              label
             >
               รอการยืนยันรายงาน
             </v-chip>
           </div>
-        </div>
-        <div class="d-flex align-center">
-          <b>รายงาน:</b>
-          <span
-            v-if="inspectionDetail.report_id == null"
-            class="ml-1 cp-text-description"
-          >
-            ยังไม่มีรายงาน
-          </span>
-          <cp-link v-else>
-            <span
-              class="ml-1 primary--text cp-semibold"
-              @click="
-                $router.push(
-                  `/projects/reports/detail?id=${inspectionDetail.report_id}`
-                )
-              "
-            >
-              ดูรายงาน
-            </span>
-          </cp-link>
         </div>
       </v-col>
 
@@ -83,15 +70,15 @@
           </v-tabs>
           <v-divider class="mb-4" />
           <v-tabs-items v-model="tab" style="overflow: visible">
+            <!-- Location Data Table -->
             <v-tab-item>
-              <!-- Location Data Table -->
               <v-data-table
                 :headers="locationHeaders"
                 :items="locationDataList"
                 :search="locationSearch"
                 :loading="locationDataLoading"
-                hide-default-footer
                 class="elevation-0"
+                hide-default-footer
               >
                 <template #top>
                   <v-btn
@@ -102,6 +89,7 @@
                     elevation="0"
                     height="42"
                     color="primary"
+                    class="mb-6"
                     block
                     @click="createLocation.dialog = true"
                   >
@@ -110,40 +98,25 @@
                       สร้าง Location
                     </div>
                   </v-btn>
-                  <div class="mt-4">
-                    <v-text-field
-                      v-model="locationSearch"
-                      append-icon="mdi-magnify"
-                      label="ค้นหา"
-                      single-line
-                      hide-details
-                      outlined
-                      dense
-                    />
-                  </div>
-                  <v-divider class="my-4"></v-divider>
+                  <v-text-field
+                    v-model="locationSearch"
+                    append-icon="mdi-magnify"
+                    label="ค้นหา"
+                    single-line
+                    hide-details
+                    outlined
+                    dense
+                  />
                 </template>
 
-                <template #item.more_detail="{ item }">
-                  <v-btn
-                    outlined
-                    color="primary"
-                    class="mt-4"
-                    @click="
-                      $router.push(
-                        `inspection/location-deflect?id=${item.location_id}`
-                      )
-                    "
-                  >
-                    <span class="cp-body">ดูข้อมูล</span>
-                    <v-icon right>mdi-open-in-new</v-icon>
-                  </v-btn>
+                <template #item.on="{ item, index }">
+                  <cp-col min="20">
+                    {{ index + 1 }}
+                  </cp-col>
                 </template>
 
                 <template #item.location_name="{ item }">
-                  <div class="text-right cp-body">
-                    {{ item.location_name }}
-                  </div>
+                  {{ item.location_name }}
                 </template>
 
                 <template #item.deflect_count="{ item }">
@@ -229,20 +202,38 @@
                   </cp-col>
                 </template>
 
+                <template #item.detail="{ item }">
+                  <v-btn
+                    color="primary"
+                    elevation="0"
+                    class="my-4"
+                    outlined
+                    block
+                    @click="
+                      $router.push(
+                        `/projects/list/detail/inspection/location-deflect?id=${item.location_id}`
+                      )
+                    "
+                  >
+                    จัดการ Deflect
+                  </v-btn>
+                </template>
+
                 <template #no-data>
                   <div class="my-6">ไม่มีข้อมูล</div>
                 </template>
               </v-data-table>
             </v-tab-item>
+
+            <!-- Systen Data Table -->
             <v-tab-item>
-              <!-- Systen Data Table -->
               <v-data-table
                 :headers="systemHeaders"
                 :items="systemDataList"
                 :search="systemSearch"
                 :loading="systemDataLoading"
-                hide-default-footer
                 class="elevation-0"
+                hide-default-footer
               >
                 <template #top>
                   <v-btn
@@ -253,6 +244,7 @@
                     elevation="0"
                     height="42"
                     color="primary"
+                    class="mb-6"
                     block
                     @click="createSystem.dialog = true"
                   >
@@ -261,40 +253,25 @@
                       สร้าง System
                     </div>
                   </v-btn>
-                  <div class="mt-4">
-                    <v-text-field
-                      v-model="systemSearch"
-                      append-icon="mdi-magnify"
-                      label="ค้นหา"
-                      single-line
-                      hide-details
-                      outlined
-                      dense
-                    />
-                  </div>
-                  <v-divider class="my-4"></v-divider>
+                  <v-text-field
+                    v-model="systemSearch"
+                    append-icon="mdi-magnify"
+                    label="ค้นหา"
+                    single-line
+                    hide-details
+                    outlined
+                    dense
+                  />
                 </template>
 
-                <template #item.more_detail="{ item }">
-                  <v-btn
-                    outlined
-                    color="primary"
-                    class="mt-4"
-                    @click="
-                      $router.push(
-                        `inspection/system-deflect?id=${item.system_id}`
-                      )
-                    "
-                  >
-                    <span class="cp-body">ดูข้อมูล</span>
-                    <v-icon right>mdi-open-in-new</v-icon>
-                  </v-btn>
+                <template #item.on="{ item, index }">
+                  <cp-col min="20">
+                    {{ index + 1 }}
+                  </cp-col>
                 </template>
 
                 <template #item.system_name="{ item }">
-                  <div class="cp-body">
-                    {{ item.system_name }}
-                  </div>
+                  {{ item.system_name }}
                 </template>
 
                 <template #item.deflect_count="{ item }">
@@ -378,39 +355,59 @@
                   </cp-col>
                 </template>
 
+                <template #item.detail="{ item }">
+                  <v-btn
+                    color="primary"
+                    elevation="0"
+                    class="my-4"
+                    outlined
+                    block
+                    @click="
+                      $router.push(
+                        `/projects/list/detail/inspection/system-deflect?id=${item.system_id}`
+                      )
+                    "
+                  >
+                    จัดการ Deflect
+                  </v-btn>
+                </template>
+
                 <template #no-data>
                   <div class="my-6">ไม่มีข้อมูล</div>
                 </template>
               </v-data-table>
             </v-tab-item>
+
+            <!-- Image Storage -->
             <v-tab-item>
-              <!-- Image Storage -->
-              <div class="mb-4">
-                จำนวนรูปทั้งหมด:
-                <b class="cp-header-2 cp-semibold">
-                  {{
-                    imageStorage.imageList.length +
-                    imageStorage.imageUsageList.length
-                  }}
-                </b>
-                รูป
-              </div>
-              <v-btn
-                elevation="0"
-                height="42"
-                color="primary"
-                block
-                @click="imageUpload.dialog = true"
-              >
-                <div class="cp-text-capitalize">
-                  <v-icon left>mdi-image-plus-outline</v-icon>
-                  อัพโหลดรูป
+              <div class="d-flex align-center pb-6">
+                <div>
+                  จำนวนรูปทั้งหมด:
+                  <b class="cp-header-2 cp-semibold">
+                    {{
+                      imageStorage.imageList.length +
+                      imageStorage.imageUsageList.length
+                    }}
+                  </b>
+                  รูป
                 </div>
-              </v-btn>
+                <v-spacer />
+                <v-btn
+                  elevation="0"
+                  height="36"
+                  color="primary"
+                  @click="imageUpload.dialog = true"
+                >
+                  <div class="cp-text-capitalize">
+                    <v-icon left>mdi-image-plus-outline</v-icon>
+                    อัพโหลดรูป
+                  </div>
+                </v-btn>
+              </div>
 
               <!-- Image Usage List -->
-              <div class="d-flex pb-6 mt-4">
-                <div class="cp-title cp-semibold">
+              <div class="d-flex pb-6">
+                <div class="cp-header-2 cp-semibold">
                   รูปที่ใช้งานอยู่ใน Location และ System
                 </div>
               </div>
@@ -431,7 +428,7 @@
                   v-for="(list, index) in imageStorage.imageUsageList"
                   :key="index + 'imageUsageList'"
                   class="d-flex child-flex"
-                  cols="12"
+                  cols="3"
                 >
                   <v-card outlined>
                     <v-img
@@ -515,6 +512,7 @@
                             inspectionDetail.report_status == 'approved'
                           "
                           icon
+                          small
                           @click="
                             (imageNameEdit.dialog = true),
                               (imageNameEdit.imageData = list),
@@ -526,10 +524,11 @@
                               inspectionDetail.report_status == 'approval' ||
                               inspectionDetail.report_status == 'approved'
                             "
+                            small
                           >
                             mdi-pencil-off-outline
                           </v-icon>
-                          <v-icon v-else>mdi-pencil-outline</v-icon>
+                          <v-icon v-else small>mdi-pencil-outline</v-icon>
                         </v-btn>
                       </div>
                     </div>
@@ -540,13 +539,14 @@
               <!-- Image List -->
               <div class="pt-6"></div>
               <v-divider class="mt-6" />
-              <div class="cp-title cp-semibold pt-6">รูปที่ยังไม่ได้ใช้งาน</div>
-              <div class="d-flex align-center pb-2">
+              <div class="d-flex align-center pt-6 pb-2">
+                <div class="cp-header-2 cp-semibold">รูปที่ยังไม่ได้ใช้งาน</div>
+                <v-spacer />
                 <v-btn
                   v-if="imageMultipleDelete.active"
                   :disabled="imageMultipleDelete.imageDataList.length < 2"
                   elevation="0"
-                  height="42"
+                  height="36"
                   color="error"
                   class="mr-4"
                   @click="imageMultipleDelete.dialog = true"
@@ -556,7 +556,6 @@
                     ลบ {{ imageMultipleDelete.imageDataList.length }}/15 รูป
                   </div>
                 </v-btn>
-                <v-spacer />
                 <v-switch
                   v-model="imageMultipleDelete.active"
                   label="ลบหลายรูป"
@@ -579,7 +578,7 @@
                   v-for="(list, index) in imageStorage.imageList"
                   :key="index + 'imageList'"
                   class="d-flex child-flex"
-                  cols="12"
+                  cols="3"
                 >
                   <v-card
                     :class="list.checked ? 'select-delete-image' : ''"
@@ -587,50 +586,52 @@
                     @mousedown="handleMouseDown(list)"
                     @mouseup="handleMouseUp"
                   >
-                    <v-sheet width="100%" class="grey lighten-2">
-                      <v-img :src="list.image_path" aspect-ratio="1.4">
-                        <div class="d-flex justify-end mt-1 mr-1">
-                          <div
-                            v-if="imageMultipleDelete.active"
-                            class="cp-checkbox mt-1 ml-2"
-                          >
-                            <input
-                              v-model="list.checked"
-                              :disabled="
-                                imageMultipleDelete.imageDataList.length ==
-                                  15 && !list.checked
-                              "
-                              type="checkbox"
-                              @click="selectImageDeleteMultiple(list)"
-                            />
-                          </div>
-                          <v-spacer />
-                          <v-btn
-                            icon
-                            small
-                            color="white"
-                            @click="
-                              (imagePreview.dialog = true),
-                                (imagePreview.imageData = list)
+                    <v-img
+                      :src="list.image_path"
+                      aspect-ratio="1.4"
+                      class="grey lighten-2"
+                    >
+                      <div class="d-flex justify-end mt-1 mr-1">
+                        <div
+                          v-if="imageMultipleDelete.active"
+                          class="cp-checkbox mt-1 ml-2"
+                        >
+                          <input
+                            v-model="list.checked"
+                            :disabled="
+                              imageMultipleDelete.imageDataList.length == 15 &&
+                              !list.checked
                             "
-                          >
-                            <v-icon>mdi-arrow-expand-all</v-icon>
-                          </v-btn>
+                            type="checkbox"
+                            @click="selectImageDeleteMultiple(list)"
+                          />
                         </div>
-                        <template #placeholder>
-                          <v-row
-                            class="fill-height ma-0"
-                            align="center"
-                            justify="center"
-                          >
-                            <v-progress-circular
-                              indeterminate
-                              color="grey lighten-5"
-                            />
-                          </v-row>
-                        </template>
-                      </v-img>
-                    </v-sheet>
+                        <v-spacer />
+                        <v-btn
+                          icon
+                          small
+                          color="white"
+                          @click="
+                            (imagePreview.dialog = true),
+                              (imagePreview.imageData = list)
+                          "
+                        >
+                          <v-icon>mdi-arrow-expand-all</v-icon>
+                        </v-btn>
+                      </div>
+                      <template #placeholder>
+                        <v-row
+                          class="fill-height ma-0"
+                          align="center"
+                          justify="center"
+                        >
+                          <v-progress-circular
+                            indeterminate
+                            color="grey lighten-5"
+                          />
+                        </v-row>
+                      </template>
+                    </v-img>
                     <div class="pa-4">
                       <div v-if="list.image_name" class="truncate">
                         {{ list.image_name }}
@@ -657,23 +658,25 @@
                         <v-spacer />
                         <v-btn
                           icon
+                          small
                           @click="
                             (imageNameEdit.dialog = true),
                               (imageNameEdit.imageData = list),
                               (imageNameEdit.imageName = list.image_name)
                           "
                         >
-                          <v-icon> mdi-pencil-outline </v-icon>
+                          <v-icon small> mdi-pencil-outline </v-icon>
                         </v-btn>
                         <v-btn
                           :disabled="imageMultipleDelete.active"
                           icon
+                          small
                           @click="
                             (imageDelete.dialog = true),
                               (imageDelete.imageData = list)
                           "
                         >
-                          <v-icon> mdi-trash-can-outline </v-icon>
+                          <v-icon small> mdi-trash-can-outline </v-icon>
                         </v-btn>
                       </div>
                     </div>
@@ -719,7 +722,7 @@
               <span class="cp-body">สร้าง Location ใหม่</span>
             </v-sheet>
             <div v-if="!createLocation.createNew">
-              <cp-label> Location </cp-label>
+              <cp-label>เลือก Location </cp-label>
               <v-select
                 v-model="createLocation.locationSelect"
                 :items="createLocation.locationList"
@@ -734,7 +737,7 @@
               />
             </div>
             <div v-else>
-              <cp-label> ชื่อ Location </cp-label>
+              <cp-label> ตั้งชื่อ Location </cp-label>
               <v-text-field
                 v-model="createLocation.locationName"
                 :rules="createLocation.locationNameRules"
@@ -766,7 +769,7 @@
               "
               :loading="createLocation.loading"
               elevation="0"
-              height="42"
+              height="36"
               color="primary"
               @click="onCreateLocation()"
             >
@@ -823,7 +826,7 @@
               <span class="cp-body">สร้าง Location ใหม่</span>
             </v-sheet>
             <div v-if="!editLocation.createNew">
-              <cp-label> Location </cp-label>
+              <cp-label> เลือก Location </cp-label>
               <v-select
                 v-model="editLocation.locationSelect"
                 :items="editLocation.locationList"
@@ -837,7 +840,7 @@
               />
             </div>
             <div v-else>
-              <cp-label> ชื่อ Location </cp-label>
+              <cp-label> ตั้งชื่อ Location </cp-label>
               <v-text-field
                 v-model="editLocation.locationName"
                 :rules="editLocation.locationNameRules"
@@ -868,7 +871,7 @@
               "
               :loading="editLocation.loading"
               elevation="0"
-              height="42"
+              height="36"
               color="primary"
               @click="onEditLocation()"
             >
@@ -907,18 +910,34 @@
             <v-card-text>
               Deflect ที่จะถูกลบไปด้วย:
               <b>
-                {{
-                  deleteLocation.data ? deleteLocation.data.deflect_count : "-"
-                }}
+                {{ deleteLocation.deflectList.length }}
               </b>
               รายการ
             </v-card-text>
           </v-card>
-          <div class="mt-6 d-flex flex-row-reverse">
+          <v-row v-if="deleteLocation.loading" class="mt-4">
+            <v-col cols="3"> ลบ Deflect </v-col>
+            <v-col cols="9">
+              <v-progress-linear
+                v-model="deleteLocation.deleteProgress"
+                color="primary"
+                height="20"
+                rounded
+              >
+                <strong class="white--text">
+                  {{ deleteLocation.deleteProgress }}%
+                </strong>
+              </v-progress-linear>
+            </v-col>
+          </v-row>
+          <div
+            v-if="!deleteLocation.loading"
+            class="mt-6 d-flex flex-row-reverse"
+          >
             <v-btn
-              :loading="deleteLocation.loading"
+              :disabled="deleteLocation.deflectLoading"
               elevation="0"
-              height="42"
+              height="36"
               color="error"
               @click="onDeleteLocation()"
             >
@@ -961,7 +980,7 @@
               <span class="cp-body">สร้าง System ใหม่</span>
             </v-sheet>
             <div v-if="!createSystem.createNew">
-              <cp-label> System </cp-label>
+              <cp-label>เลือก System </cp-label>
               <v-select
                 v-model="createSystem.systemSelect"
                 :items="createSystem.systemList"
@@ -975,7 +994,7 @@
               />
             </div>
             <div v-else>
-              <cp-label> ชื่อ System </cp-label>
+              <cp-label> ตั้งชื่อ System </cp-label>
               <v-text-field
                 v-model="createSystem.systemName"
                 :rules="createSystem.systemNameRules"
@@ -1005,7 +1024,7 @@
               "
               :loading="createSystem.loading"
               elevation="0"
-              height="42"
+              height="36"
               color="primary"
               @click="onCreateSystem()"
             >
@@ -1062,7 +1081,7 @@
               <span class="cp-body">สร้าง System ใหม่</span>
             </v-sheet>
             <div v-if="!editSystem.createNew">
-              <cp-label> System </cp-label>
+              <cp-label> เลือก System </cp-label>
               <v-select
                 v-model="editSystem.systemSelect"
                 :items="editSystem.systemList"
@@ -1076,7 +1095,7 @@
               />
             </div>
             <div v-else>
-              <cp-label> ชื่อ System </cp-label>
+              <cp-label> ตั้งชื่อ System </cp-label>
               <v-text-field
                 v-model="editSystem.systemName"
                 :rules="editSystem.systemNameRules"
@@ -1104,7 +1123,7 @@
               "
               :loading="editSystem.loading"
               elevation="0"
-              height="42"
+              height="36"
               color="primary"
               @click="onEditSystem()"
             >
@@ -1143,16 +1162,35 @@
             <v-card-text>
               Deflect ที่จะถูกลบไปด้วย:
               <b>
-                {{ deleteSystem.data ? deleteSystem.data.deflect_count : "-" }}
+                {{ deleteSystem.deflectList.length }}
               </b>
               รายการ
             </v-card-text>
           </v-card>
-          <div class="mt-6 d-flex flex-row-reverse">
+          <v-row v-if="deleteSystem.loading" class="mt-4">
+            <v-col cols="3"> ลบ Deflect </v-col>
+            <v-col cols="9">
+              <v-progress-linear
+                v-model="deleteSystem.deleteProgress"
+                color="primary"
+                height="20"
+                rounded
+              >
+                <strong class="white--text">
+                  {{ deleteSystem.deleteProgress }}%
+                </strong>
+              </v-progress-linear>
+            </v-col>
+          </v-row>
+
+          <div
+            v-if="!deleteSystem.loading"
+            class="mt-6 d-flex flex-row-reverse"
+          >
             <v-btn
-              :loading="deleteSystem.loading"
+              :disabled="deleteSystem.deflectLoading"
               elevation="0"
-              height="42"
+              height="36"
               color="error"
               @click="onDeleteSystem()"
             >
@@ -1167,15 +1205,18 @@
     <v-dialog
       v-model="imageUpload.dialog"
       :persistent="imageUpload.loading"
+      scrollable
+      width="800"
       transition="dialog-transition"
       content-class="elevation-0"
-      scrollable
-      fullscreen
     >
       <v-card>
         <v-card-title>
           <div>
             <div>อัพโหลดรูป</div>
+            <div class="cp-body cp-text-description">
+              หากอัพโหลดรูปมากกว่า 8 รูปกรุณารอระบบดำเนินการให้แล้วเสร็จก่อน
+            </div>
           </div>
           <v-spacer />
           <v-btn
@@ -1217,9 +1258,7 @@
               md="4"
             >
               <v-card outlined>
-                <v-sheet width="100%" color="grey lighten-2">
-                  <v-img :src="list.image" aspect-ratio="1.4" contain />
-                </v-sheet>
+                <v-img :src="list.image" aspect-ratio="1.4" />
                 <div class="pt-4 pb-2 px-4">
                   <div class="mb-4">
                     <v-text-field
@@ -1235,8 +1274,8 @@
                     <div class="cp-caption cp-text-description">
                       ขนาดไฟล์: <b>{{ convertBytes(list.size) }}</b>
                     </div>
-                    <v-btn icon @click="removeImageUploadList(i)">
-                      <v-icon>mdi-trash-can-outline</v-icon>
+                    <v-btn icon small @click="removeImageUploadList(i)">
+                      <v-icon small>mdi-trash-can-outline</v-icon>
                     </v-btn>
                   </div>
                 </div>
@@ -1276,7 +1315,7 @@
             :loading="imageUpload.loading"
             :disabled="imageUpload.imageList.length == 0"
             elevation="0"
-            height="42"
+            height="36"
             color="primary"
             class="mb-2"
             @click="onUploadImageCheck()"
@@ -1291,33 +1330,32 @@
     <v-dialog
       v-model="imagePreview.dialog"
       :persistent="imagePreview.loading"
+      scrollable
+      width="800"
       transition="dialog-transition"
       content-class="elevation-0"
-      scrollable
-      fullscreen
     >
       <v-card v-if="imagePreview.imageData">
         <v-card-title>
+          <div v-if="imagePreview.imageData.image_name">
+            {{ imagePreview.imageData.image_name }}
+          </div>
+          <div v-else class="cp-text-disable">ไม่มีชื่อรูป</div>
           <v-spacer />
           <v-btn icon class="mt-n4 mr-n4" @click="imagePreview.dialog = false">
             <v-icon>mdi-close</v-icon>
           </v-btn>
         </v-card-title>
-        <v-sheet color="grey lighten-3">
-          <v-img
-            :src="imagePreview.imageData.image_path"
-            width="100%"
-            aspect-ratio="1.4"
-            contain
-          ></v-img>
-        </v-sheet>
-        <div class="pa-4">
-          <div v-if="imagePreview.imageData.image_name">
-            <b>ชื่อรูป: </b>
-            {{ imagePreview.imageData.image_name }}
-          </div>
-          <div v-else class="cp-text-disable">ไม่มีชื่อรูป</div>
-        </div>
+        <v-card-text>
+          <v-sheet color="grey lighten-3">
+            <v-img
+              :src="imagePreview.imageData.image_path"
+              width="100%"
+              aspect-ratio="1.4"
+              contain
+            ></v-img>
+          </v-sheet>
+        </v-card-text>
       </v-card>
     </v-dialog>
 
@@ -1349,7 +1387,7 @@
             <v-btn
               :loading="imageDelete.loading"
               elevation="0"
-              height="42"
+              height="36"
               color="error"
               @click="onDeleteImage()"
             >
@@ -1388,7 +1426,7 @@
             <v-btn
               :loading="imageMultipleDelete.loading"
               elevation="0"
-              height="42"
+              height="36"
               color="error"
               @click="onDeleteMultipleImage()"
             >
@@ -1432,7 +1470,7 @@
             <v-btn
               :loading="imageNameEdit.loading"
               elevation="0"
-              height="42"
+              height="36"
               color="primary"
               @click="onEditImageName()"
             >
@@ -1453,25 +1491,31 @@ export default {
   data() {
     return {
       tab: null,
-      tabList: ["Location", "System", "คลังรูปภาพ"],
+      tabList: ["Location", "System"],
       inspectionDetail: null,
       // Location Value
       locationDataLoading: false,
       locationSearch: "",
       locationHeaders: [
-        { value: "more_detail", sortable: false },
+        { text: "ลำดับ", align: "center", value: "on", sortable: false },
         { text: "Location", value: "location_name", sortable: false },
         { text: "Deflect", value: "deflect_count", sortable: false },
-        { text: "ผ่าน", value: "deflect_status_1_count", sortable: false },
-        { text: "ไม่ผ่าน", value: "deflect_status_0_count", sortable: false },
         {
           text: "ยังไม่ได้ตรวจ",
           value: "deflect_status_null_count",
           sortable: false,
         },
+        { text: "ผ่าน", value: "deflect_status_1_count", sortable: false },
+        { text: "ไม่ผ่าน", value: "deflect_status_0_count", sortable: false },
         {
+          text: "การดำเนินการ",
           align: "center",
           value: "actions",
+          sortable: false,
+        },
+        {
+          align: "center",
+          value: "detail",
           sortable: false,
         },
       ],
@@ -1490,11 +1534,6 @@ export default {
           (v) => !/^\s+/.test(v) || "ห้ามมีช่องว่างด้านหน้า",
         ],
       },
-      deleteLocation: {
-        loading: false,
-        dialog: false,
-        data: null,
-      },
       editLocation: {
         loading: false,
         dialog: false,
@@ -1512,24 +1551,38 @@ export default {
         ],
         locationId: "",
       },
+      deleteLocation: {
+        loading: false,
+        dialog: false,
+        data: null,
+        deflectLoading: false,
+        deflectList: [],
+        deleteProgress: 0,
+      },
 
       // System Value
       systemDataLoading: false,
       systemSearch: "",
       systemHeaders: [
-        { value: "more_detail", sortable: false },
+        { text: "ลำดับ", align: "center", value: "on", sortable: false },
         { text: "System", value: "system_name", sortable: false },
         { text: "Deflect", value: "deflect_count", sortable: false },
-        { text: "ผ่าน", value: "deflect_status_1_count", sortable: false },
-        { text: "ไม่ผ่าน", value: "deflect_status_0_count", sortable: false },
         {
           text: "ยังไม่ได้ตรวจ",
           value: "deflect_status_null_count",
           sortable: false,
         },
+        { text: "ผ่าน", value: "deflect_status_1_count", sortable: false },
+        { text: "ไม่ผ่าน", value: "deflect_status_0_count", sortable: false },
         {
+          text: "การดำเนินการ",
           align: "center",
           value: "actions",
+          sortable: false,
+        },
+        {
+          align: "center",
+          value: "detail",
           sortable: false,
         },
       ],
@@ -1548,11 +1601,6 @@ export default {
           (v) => !/^\s+/.test(v) || "ห้ามมีช่องว่างด้านหน้า",
         ],
       },
-      deleteSystem: {
-        loading: false,
-        dialog: false,
-        data: null,
-      },
       editSystem: {
         loading: false,
         dialog: false,
@@ -1570,6 +1618,15 @@ export default {
         ],
         systemId: "",
       },
+      deleteSystem: {
+        loading: false,
+        dialog: false,
+        data: null,
+        deflectLoading: false,
+        deflectList: [],
+        deleteProgress: 0,
+      },
+      // Image Storage
       imageStorage: {
         imageListLoading: false,
         imageUsageList: [],
@@ -1626,12 +1683,7 @@ export default {
   watch: {
     inspectionDetail(newData) {
       if (newData) {
-        if (this.$route.query.tab && this.$route.query.tab === "location") {
-          this.tab = 0;
-        } else if (
-          this.$route.query.tab &&
-          this.$route.query.tab === "system"
-        ) {
+        if (this.$route.query.tab && this.$route.query.tab === "system") {
           this.tab = 1;
         }
       }
@@ -1656,10 +1708,10 @@ export default {
     },
 
     tab(newData) {
-      if (newData === 1 && this.systemDataList.length === 0) {
+      if (newData === 0) {
+        this.getLocationList();
+      } else if (newData === 1) {
         this.getSystemList();
-      } else if (newData === 2) {
-        this.getImageList();
       }
     },
 
@@ -1669,6 +1721,15 @@ export default {
         this.createLocation.locationName = "";
         this.createLocation.locationSelect =
           this.createLocation.locationList[0];
+      } else {
+        this.inspectionCheckHealthy();
+      }
+    },
+
+    "deleteLocation.dialog"(newValue) {
+      if (newValue) {
+        this.inspectionCheckHealthy();
+        this.getLocationDeflectList();
       }
     },
 
@@ -1678,6 +1739,8 @@ export default {
         this.editLocation.locationName = "";
         this.editLocation.locationSelect = this.editLocation.locationList[0];
         this.editLocation.locationSelectBeforeNo = false;
+      } else {
+        this.inspectionCheckHealthy();
       }
     },
 
@@ -1686,6 +1749,15 @@ export default {
         this.createSystem.createNew = false;
         this.createSystem.systemName = "";
         this.createSystem.systemSelect = this.createSystem.systemList[0];
+      } else {
+        this.inspectionCheckHealthy();
+      }
+    },
+
+    "deleteSystem.dialog"(newValue) {
+      if (newValue) {
+        this.inspectionCheckHealthy();
+        this.getSystemDeflectList();
       }
     },
 
@@ -1695,6 +1767,8 @@ export default {
         this.editSystem.systemName = "";
         this.editSystem.systemSelect = this.editSystem.systemList[0];
         this.editSystem.systemSelectBeforeNo = false;
+      } else {
+        this.inspectionCheckHealthy();
       }
     },
 
@@ -1702,6 +1776,8 @@ export default {
       if (!newValue) {
         this.imageUpload.imageList = [];
         this.imageUpload.uploadPersen = 0;
+      } else {
+        this.inspectionCheckHealthy();
       }
     },
 
@@ -1751,6 +1827,45 @@ export default {
       );
     },
 
+    async inspectionCheckHealthy() {
+      const accessToken = await this.getAccessToken();
+      if (accessToken) {
+        this.$axios
+          .post(
+            `${process.env.API_ENDPOINT}/v1/project/inspection/check`,
+            {
+              inspection_id: this.$route.query.id,
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+              },
+            }
+          )
+          .then(({ data }) => {
+            if (!data.data) {
+              this.onNotify({
+                notifyValue: true,
+                type: "warning",
+                title: "แจ้งเตือนจากระบบ",
+                message: `รายการตรวจที่ ${this.inspectionDetail.inspection_no} ถูกผู้ใช้งานท่านอื่นลบแล้ว`,
+              });
+              this.$router.push(
+                `/projects/list/detail?id=${this.inspectionDetail.project_id}`
+              );
+            }
+          })
+          .catch(({ response }) => {
+            this.onNotify({
+              notifyValue: true,
+              type: "error",
+              title: "เกิดข้อผิดพลาด",
+              message: response,
+            });
+          });
+      }
+    },
+
     async getInspectionDetail() {
       const accessToken = await this.getAccessToken();
       if (accessToken) {
@@ -1775,7 +1890,8 @@ export default {
               notifyValue: true,
               type: "error",
               title: "เกิดข้อผิดพลาด",
-              message: response.data,
+              message:
+                "ไม่สามารถเข้าถึงข้อมูลของ รายการตรวจนี้ได้ กรุณาลองใหม่อีกครั้ง เป็นไปได้ว่ารายการตรวจนี้ถูกลบไปแล้ว",
             });
           });
       }
@@ -1801,6 +1917,7 @@ export default {
           )
           .then(({ data }) => {
             this.locationDataLoading = false;
+            data.data.sort((a, b) => a.id - b.id);
             this.locationDataList = data.data;
           })
           .catch(({ response }) => {
@@ -1980,10 +2097,57 @@ export default {
         });
     },
 
+    async getLocationDeflectList() {
+      const accessToken = await this.getAccessToken();
+      if (accessToken) {
+        this.deleteLocation.deflectLoading = true;
+        this.$axios
+          .post(
+            `${process.env.API_ENDPOINT}/v1/project/inspection/location/deflect/list`,
+            {
+              project_id: this.deleteLocation.data.project_id,
+              inspection_id: this.deleteLocation.data.inspection_id,
+              location_id: this.deleteLocation.data.location_id,
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+              },
+            }
+          )
+          .then(({ data }) => {
+            if (data.data) {
+              this.deleteLocation.deflectLoading = false;
+              this.deleteLocation.deflectList = data.data;
+            }
+          })
+          .catch((error) => {
+            this.onNotify({
+              notifyValue: true,
+              type: "error",
+              title: "ดำเนินการไม่สำเร็จ",
+              message: error,
+            });
+          });
+      }
+    },
+
     async onDeleteLocation() {
       const accessToken = await this.getAccessToken();
       if (accessToken) {
         this.deleteLocation.loading = true;
+
+        for (let i = 0; i < this.deleteLocation.deflectList.length; i++) {
+          const imageId = this.deleteLocation.deflectList[i].image_id;
+          const imagePath = this.deleteLocation.deflectList[i].image_path;
+          await this.runMultipleDeleteLocationDeflect(
+            accessToken,
+            imageId,
+            imagePath,
+            i
+          );
+        }
+
         this.$axios
           .post(
             `${process.env.API_ENDPOINT}/v1/project/inspection/location/delete`,
@@ -2018,6 +2182,36 @@ export default {
               message: response.data,
             });
           });
+      }
+    },
+
+    async runMultipleDeleteLocationDeflect(
+      accessToken,
+      imageId,
+      imagePath,
+      index
+    ) {
+      try {
+        await this.$axios.post(
+          `${process.env.API_ENDPOINT}/v1/project/inspection/location/deflect/single-delete`,
+          {
+            project_id: this.deleteLocation.data.project_id,
+            inspection_id: this.deleteLocation.data.inspection_id,
+            location_id: this.deleteLocation.data.location_id,
+            image_id: imageId,
+            image_path: imagePath,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+        );
+        const progress =
+          ((index + 1) / this.deleteLocation.deflectList.length) * 100;
+        this.deleteLocation.deleteProgress = progress.toFixed(2);
+      } catch ({ response }) {
+        this.handleUploadError(response.data);
       }
     },
 
@@ -2189,6 +2383,7 @@ export default {
           )
           .then(({ data }) => {
             this.systemDataLoading = false;
+            data.data.sort((a, b) => a.id - b.id);
             this.systemDataList = data.data;
           })
           .catch(({ response }) => {
@@ -2364,10 +2559,57 @@ export default {
         });
     },
 
+    async getSystemDeflectList() {
+      const accessToken = await this.getAccessToken();
+      if (accessToken) {
+        this.deleteSystem.deflectLoading = true;
+        this.$axios
+          .post(
+            `${process.env.API_ENDPOINT}/v1/project/inspection/system/deflect/list`,
+            {
+              project_id: this.deleteSystem.data.project_id,
+              inspection_id: this.deleteSystem.data.inspection_id,
+              system_id: this.deleteSystem.data.system_id,
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+              },
+            }
+          )
+          .then(({ data }) => {
+            if (data.data) {
+              this.deleteSystem.deflectLoading = false;
+              this.deleteSystem.deflectList = data.data;
+            }
+          })
+          .catch((error) => {
+            this.onNotify({
+              notifyValue: true,
+              type: "error",
+              title: "ดำเนินการไม่สำเร็จ",
+              message: error,
+            });
+          });
+      }
+    },
+
     async onDeleteSystem() {
       const accessToken = await this.getAccessToken();
       if (accessToken) {
         this.deleteSystem.loading = true;
+
+        for (let i = 0; i < this.deleteSystem.deflectList.length; i++) {
+          const imageId = this.deleteSystem.deflectList[i].image_id;
+          const imagePath = this.deleteSystem.deflectList[i].image_path;
+          await this.runMultipleDeleteSystemDeflect(
+            accessToken,
+            imageId,
+            imagePath,
+            i
+          );
+        }
+
         this.$axios
           .post(
             `${process.env.API_ENDPOINT}/v1/project/inspection/system/delete`,
@@ -2402,6 +2644,36 @@ export default {
               message: response.data,
             });
           });
+      }
+    },
+
+    async runMultipleDeleteSystemDeflect(
+      accessToken,
+      imageId,
+      imagePath,
+      index
+    ) {
+      try {
+        await this.$axios.post(
+          `${process.env.API_ENDPOINT}/v1/project/inspection/system/deflect/single-delete`,
+          {
+            project_id: this.deleteSystem.data.project_id,
+            inspection_id: this.deleteSystem.data.inspection_id,
+            system_id: this.deleteSystem.data.system_id,
+            image_id: imageId,
+            image_path: imagePath,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+        );
+        const progress =
+          ((index + 1) / this.deleteSystem.deflectList.length) * 100;
+        this.deleteSystem.deleteProgress = progress.toFixed(2);
+      } catch ({ response }) {
+        this.handleUploadError(response.data);
       }
     },
 
@@ -2872,6 +3144,16 @@ export default {
       data.checked = true;
       this.imageMultipleDelete.active = true;
       this.imageMultipleDelete.imageDataList.push(data);
+    },
+
+    handleUploadError(error) {
+      this.imageUpload.loading = false;
+      this.onNotify({
+        notifyValue: true,
+        type: "error",
+        title: "ดำเนินการไม่สำเร็จ",
+        message: error,
+      });
     },
   },
 };

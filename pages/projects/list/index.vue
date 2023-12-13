@@ -45,16 +45,19 @@
           v-for="(list, index) in filteredProjects"
           :key="index"
           cols="12"
-          md="3"
+          lg="3"
+          md="4"
+          sm="6"
         >
           <cp-card>
             <div class="d-flex align-center pt-4 pb-2 px-4">
               <div class="cp-overline cp-text-description cp-medium">
-                <v-chip v-if="list.project_status == 'to-do'" label>
+                <v-chip v-if="list.project_status == 'to-do'" small label>
                   เตรียมดำเนินการ
                 </v-chip>
                 <v-chip
                   v-else-if="list.project_status == 'in-progress'"
+                  small
                   label
                   color="warning"
                 >
@@ -62,6 +65,7 @@
                 </v-chip>
                 <v-chip
                   v-else-if="list.project_status == 'report-approval'"
+                  small
                   label
                   color="green lighten-3"
                 >
@@ -69,6 +73,7 @@
                 </v-chip>
                 <v-chip
                   v-else-if="list.project_status == 'done'"
+                  small
                   label
                   color="success"
                 >
@@ -78,7 +83,7 @@
               <v-spacer />
               <v-menu bottom left>
                 <template #activator="{ on, attrs }">
-                  <v-btn icon v-bind="attrs" v-on="on">
+                  <v-btn small icon v-bind="attrs" v-on="on">
                     <v-icon>mdi-dots-horizontal</v-icon>
                   </v-btn>
                 </template>
@@ -93,6 +98,22 @@
                     <v-icon small left>mdi-open-in-new</v-icon>
                     <span>ดูรายละเอียด</span>
                   </v-list-item>
+                  <div
+                    v-if="
+                      role == 'Project Manager' ||
+                      role == 'Admin' ||
+                      role == 'Supervisor'
+                    "
+                    class="delete-project"
+                    @click="
+                      (deleteProject.dialog = true), (deleteProject.data = list)
+                    "
+                  >
+                    <v-icon class="delete-project-icon" small left>
+                      mdi-trash-can-outline
+                    </v-icon>
+                    <span>ลบโปรเจค</span>
+                  </div>
                 </v-list>
               </v-menu>
             </div>
@@ -101,8 +122,7 @@
                 <v-col cols="12">
                   <v-img
                     :src="list.project_image"
-                    height="250"
-                    contain
+                    aspect-ratio="1.4"
                     class="cp-image-card"
                   >
                     <template #placeholder>
@@ -126,9 +146,13 @@
                 <v-col cols="12" class="mt-2">
                   <div class="cp-body cp-semibold pb-1">
                     <div
-                      @click="$router.push(`list/detail?id=${list.project_id}`)"
+                      @click="
+                        $router.push(
+                          `/projects/list/detail?id=${list.project_id}`
+                        )
+                      "
                     >
-                      <cp-link>
+                      <cp-link class="truncate">
                         {{ list.project_name }}
                       </cp-link>
                     </div>
@@ -161,18 +185,18 @@
                 <v-col cols="6">
                   <div class="cp-caption mt-3">
                     <div class="cp-text-description">ลูกค้า</div>
-                    <span class="truncate-col cp-semibold">
+                    <div class="truncate-col cp-semibold">
                       {{ list.customer.customer_name }}
-                    </span>
+                    </div>
                   </div>
                 </v-col>
 
                 <v-col cols="6">
                   <div class="cp-caption mt-3">
                     <div class="cp-text-description">เจ้าหน้าที่โครงการ</div>
-                    <span class="truncate-col cp-semibold">
+                    <div class="truncate-col cp-semibold">
                       {{ list.coordinator.coordinator_name || "-" }}
-                    </span>
+                    </div>
                   </div>
                 </v-col>
 
@@ -182,13 +206,13 @@
 
                 <v-col cols="6">
                   <div class="cp-caption">
-                    <div class="cp-text-description pb-1">หัวหน้าทีม</div>
+                    <div class="cp-text-description">หัวหน้าทีม</div>
                     <div v-if="!list.checker_supervisor.code_name">-</div>
                     <v-tooltip v-else top>
                       <template #activator="{ on, attrs }">
                         <v-avatar
                           v-bind="attrs"
-                          size="40"
+                          size="28"
                           color="primary"
                           v-on="on"
                         >
@@ -211,7 +235,7 @@
 
                 <v-col cols="6">
                   <div class="cp-caption">
-                    <div class="cp-text-description pb-1">ทีมงาน</div>
+                    <div class="cp-text-description">ทีมงาน</div>
                     <div v-if="list.checker_team.length === 0">-</div>
                     <div v-else class="avatar-action-container">
                       <div
@@ -225,7 +249,7 @@
                           <template #activator="{ on, attrs }">
                             <v-avatar
                               v-bind="attrs"
-                              size="40"
+                              size="28"
                               color="primary"
                               v-on="on"
                             >
@@ -310,7 +334,7 @@
               :loading="deleteProject.loading"
               :disabled="deleteProject.data.inspection_count > 0"
               elevation="0"
-              height="42"
+              height="36"
               color="error"
               @click="onDeleteProject()"
             >
@@ -408,37 +432,7 @@ export default {
               this.projectList = data.data;
               this.filteredProjects = data.data;
               await this.mapCheckerTeam();
-
-              const x = setInterval(() => {
-                if (this.role) {
-                  if (this.role === "Checker") {
-                    const afterData = this.filteredProjects.map((item) => {
-                      const allAccountIds = [
-                        item.checker_supervisor.account_id,
-                        ...item.checker_team.map((team) => team.account_id),
-                      ];
-                      return {
-                        ...item,
-                        allAccountId: allAccountIds,
-                      };
-                    });
-
-                    for (let i = afterData.length - 1; i >= 0; i--) {
-                      const checking = afterData[i].allAccountId.includes(
-                        this.accountId
-                      );
-                      if (!checking) {
-                        afterData.splice(i, 1);
-                      }
-                    }
-
-                    this.projectList = afterData;
-                    this.filteredProjects = afterData;
-                  }
-                  this.projectLoading = false;
-                  clearInterval(x);
-                }
-              }, 1000);
+              this.projectLoading = false;
             }
           })
           .catch(({ response }) => {
