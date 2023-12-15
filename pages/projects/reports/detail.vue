@@ -96,7 +96,7 @@
             @click="onBeforeApprovalReport()"
           >
             <v-icon left>mdi-file-sign</v-icon>
-            ขอการยืนยันรางงาน
+            ขอการยืนยันรายงาน
           </v-btn>
         </div>
 
@@ -701,7 +701,7 @@
     >
       <v-card>
         <v-card-title>
-          ลบรางงานนี้
+          ลบรายงานนี้
           <v-spacer />
           <v-btn
             :disabled="deleteReport.loading"
@@ -740,7 +740,7 @@
     >
       <v-card>
         <v-card-title>
-          ขอการยืนยันรางงาน
+          ขอการยืนยันรายงาน
           <v-spacer />
           <v-btn
             :disabled="approvalReport.loading"
@@ -754,7 +754,7 @@
         <v-card-text>
           <div>
             <div class="warning--text pb-4">
-              การขอยืนยันจะทำให้ไม่สามารถแก้ไขข้อมูลทั้งหมดที่เกี่ยวข้องกับโปรเจคนี้ได้อีก
+              การขอยืนยันจะทำให้ไม่สามารถแก้ไขข้อมูลทั้งหมดที่เกี่ยวข้องกับโปรเจคนี้ได้โปรดตรวจสอบข้อมูลก่อนขอยืนยัน
             </div>
             <cp-label>หัวหน้าทีมตรวจของรายการตรวจนี้</cp-label>
             <v-card outlined class="pa-2">
@@ -810,7 +810,7 @@
     >
       <v-card>
         <v-card-title>
-          ยกเลิกยืนยันรางงาน
+          ยกเลิกยืนยันรายงาน
           <v-spacer />
           <v-btn
             :disabled="cancelApproval.loading"
@@ -822,7 +822,7 @@
           </v-btn>
         </v-card-title>
         <v-card-text>
-          การยกเลิกการยืนยันจะทำให้สามารถแก้ไขข้อมูลรายงานได้
+          การยกเลิกการยืนยันรายงานจะทำให้สามารถแก้ไขข้อมูลรายงานได้
           <div class="mt-6 d-flex flex-row-reverse">
             <v-btn
               :loading="cancelApproval.loading"
@@ -849,7 +849,7 @@
     >
       <v-card>
         <v-card-title>
-          ยืนยันรางงาน
+          ยืนยันรายงาน
           <v-spacer />
           <v-btn
             :disabled="confirmReport.loading"
@@ -861,7 +861,7 @@
           </v-btn>
         </v-card-title>
         <v-card-text>
-          การยืนยันรายงานนี้จะทำให้สถานะของโปรเจคเสร็จสิ้นและไม่สามารถแก้ไขข้อมูลได้อีก
+          การยืนยันรายงานจะทำให้สถานะของโปรเจคเสร็จสิ้นและไม่สามารถแก้ไขข้อมูลในรายการตรวจได้อีก
           <div class="mt-6 d-flex flex-row-reverse">
             <v-btn
               :loading="confirmReport.loading"
@@ -1539,7 +1539,8 @@ export default {
       }
     },
 
-    async getImageBase64(accessToken, imagePath) {
+    async getImageBase64(imagePath) {
+      const accessToken = await this.getAccessToken();
       if (accessToken) {
         try {
           const response = await this.$axios.post(
@@ -1566,76 +1567,70 @@ export default {
       }
     },
 
-    async createPDF() {
-      const accessToken = await this.getAccessToken();
-      if (accessToken) {
-        this.downloadPDFLoading = true;
-        const pdfPageDetail = [
-          {
-            page: 1,
-            mainImage: this.projectFile.main,
-            projectDetail: this.reportDetail.project_detail,
-            typeDetail: this.reportDetail.type_detail,
-            customerDetail: this.reportDetail.customer_detail,
-            coordinatorDetail: this.reportDetail.coordinator_detail,
-          },
-        ];
+    createPDF() {
+      this.downloadPDFLoading = true;
+      const pdfPageDetail = [
+        {
+          page: 1,
+          mainImage: this.projectFile.main,
+          projectDetail: this.reportDetail.project_detail,
+          typeDetail: this.reportDetail.type_detail,
+          customerDetail: this.reportDetail.customer_detail,
+          coordinatorDetail: this.reportDetail.coordinator_detail,
+        },
+      ];
 
-        const planList = [
-          this.projectFile.plan1,
-          this.projectFile.plan2,
-          this.projectFile.plan3,
-          this.projectFile.plan4,
-        ].filter(Boolean);
+      const planList = [
+        this.projectFile.plan1,
+        this.projectFile.plan2,
+        this.projectFile.plan3,
+        this.projectFile.plan4,
+      ].filter(Boolean);
 
-        planList.forEach((plan, index) => {
-          const pageNumber = Math.floor(index / 2) + 2;
-          const planNumber = index + 1;
+      planList.forEach((plan, index) => {
+        const pageNumber = Math.floor(index / 2) + 2;
+        const planNumber = index + 1;
 
-          pdfPageDetail[pageNumber - 1] = pdfPageDetail[pageNumber - 1] || {
-            page: pageNumber,
-          };
-          pdfPageDetail[pageNumber - 1][`plan${planNumber}`] = {
-            plan: planNumber,
-            image: plan,
-          };
-        });
+        pdfPageDetail[pageNumber - 1] = pdfPageDetail[pageNumber - 1] || {
+          page: pageNumber,
+        };
+        pdfPageDetail[pageNumber - 1][`plan${planNumber}`] = {
+          plan: planNumber,
+          image: plan,
+        };
+      });
 
-        const noteDataGroup = this.noteGroupList.map((e) => ({
-          title: e.report_title,
-          noteList: e.note_list.map((x) => ({
-            listMessage: x.list_message,
-          })),
-        }));
+      const noteDataGroup = this.noteGroupList.map((e) => ({
+        title: e.report_title,
+        noteList: e.note_list.map((x) => ({
+          listMessage: x.list_message,
+        })),
+      }));
 
-        const filterKeys = ["image_path", "deflect_status", "deflect_detail"];
-        const filterDeflectList = (list) =>
-          list.map((deflect) =>
-            Object.fromEntries(
-              Object.entries(deflect).filter(([key]) =>
-                filterKeys.includes(key)
-              )
-            )
-          );
-
-        const filteredLocationSetup = this.locationList.map((e) => ({
-          locationName: e.location_name,
-          deflectList: filterDeflectList(e.deflect_list),
-        }));
-
-        const filteredSystemSetup = this.systemList.map((e) => ({
-          systemName: e.system_name,
-          deflectList: filterDeflectList(e.deflect_list),
-        }));
-
-        this.setupImage(
-          accessToken,
-          pdfPageDetail,
-          noteDataGroup,
-          filteredLocationSetup,
-          filteredSystemSetup
+      const filterKeys = ["image_path", "deflect_status", "deflect_detail"];
+      const filterDeflectList = (list) =>
+        list.map((deflect) =>
+          Object.fromEntries(
+            Object.entries(deflect).filter(([key]) => filterKeys.includes(key))
+          )
         );
-      }
+
+      const filteredLocationSetup = this.locationList.map((e) => ({
+        locationName: e.location_name,
+        deflectList: filterDeflectList(e.deflect_list),
+      }));
+
+      const filteredSystemSetup = this.systemList.map((e) => ({
+        systemName: e.system_name,
+        deflectList: filterDeflectList(e.deflect_list),
+      }));
+
+      this.setupImage(
+        pdfPageDetail,
+        noteDataGroup,
+        filteredLocationSetup,
+        filteredSystemSetup
+      );
     },
 
     async setupImage(
