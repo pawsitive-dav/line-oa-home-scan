@@ -1,4 +1,3 @@
-<!-- eslint-disable vue/no-unused-vars -->
 <!-- eslint-disable vue/valid-v-slot -->
 <template>
   <div>
@@ -77,8 +76,10 @@
                 :items="locationDataList"
                 :search="locationSearch"
                 :loading="locationDataLoading"
-                class="elevation-0"
+                :items-per-page="-1"
+                hide-default-header
                 hide-default-footer
+                class="elevation-0"
               >
                 <template #top>
                   <v-btn
@@ -106,121 +107,183 @@
                     hide-details
                     outlined
                     dense
+                    class="mb-6"
                   />
                 </template>
 
-                <template #item.on="{ item, index }">
-                  <cp-col min="20">
-                    {{ index + 1 }}
-                  </cp-col>
+                <template #item.card_action="{ item, index }">
+                  <div class="d-flex align-center mt-4 mb-6">
+                    <v-btn
+                      :disabled="
+                        index + 1 === 1 ||
+                        inspectionDetail.report_status == 'approval' ||
+                        inspectionDetail.report_status == 'approved'
+                      "
+                      small
+                      elevation="0"
+                      color="#DBEEFE"
+                      @click="moveLocationItemList('up', item.location_id)"
+                    >
+                      <v-icon color="info">mdi-arrow-up-bold</v-icon>
+                    </v-btn>
+                    <v-spacer />
+                    <div class="cp-body cp-semibold primary--text">
+                      ลำดับ:
+                      {{ index + 1 }}
+                    </div>
+                    <v-spacer />
+                    <v-btn
+                      :disabled="
+                        locationDataList.length === index + 1 ||
+                        inspectionDetail.report_status == 'approval' ||
+                        inspectionDetail.report_status == 'approved'
+                      "
+                      small
+                      elevation="0"
+                      color="#DBEEFE"
+                      @click="moveLocationItemList('down', item.location_id)"
+                    >
+                      <v-icon color="info">mdi-arrow-down-bold</v-icon>
+                    </v-btn>
+                  </div>
                 </template>
 
                 <template #item.location_name="{ item }">
-                  {{ item.location_name }}
+                  <v-row no-gutters>
+                    <v-col cols="4" class="text-left">
+                      <cp-label>Location</cp-label>
+                    </v-col>
+                    <v-col cols="8" class="cp-body">
+                      <v-card color="transparent" flat>
+                        {{ item.location_name }}
+                      </v-card>
+                    </v-col>
+                  </v-row>
                 </template>
 
                 <template #item.deflect_count="{ item }">
-                  <cp-col min="80">
-                    <v-chip v-if="item.deflect_count != 0" color="primary">
-                      {{ item.deflect_count }}
-                    </v-chip>
-                    <v-chip v-else color="grey lighten-4">0</v-chip>
-                  </cp-col>
-                </template>
-
-                <template #item.deflect_status_1_count="{ item }">
-                  <cp-col min="80">
-                    <v-chip
-                      v-if="item.deflect_status_1_count != 0"
-                      color="success"
-                    >
-                      {{ item.deflect_status_1_count }}
-                    </v-chip>
-                    <v-chip v-else color="grey lighten-4">0</v-chip>
-                  </cp-col>
+                  <v-row no-gutters>
+                    <v-col cols="4" class="text-left">
+                      <cp-label class="mt-2">Deflect ทั้งหมด</cp-label>
+                    </v-col>
+                    <v-col cols="8" class="cp-body">
+                      <v-chip v-if="item.deflect_count != 0" color="primary">
+                        {{ item.deflect_count }}
+                      </v-chip>
+                      <v-chip v-else color="grey lighten-4">0</v-chip>
+                    </v-col>
+                  </v-row>
                 </template>
 
                 <template #item.deflect_status_0_count="{ item }">
-                  <cp-col min="80">
-                    <v-chip
-                      v-if="item.deflect_status_0_count != 0"
-                      color="error"
-                    >
-                      {{ item.deflect_status_0_count }}
-                    </v-chip>
-                    <v-chip v-else color="grey lighten-4">0</v-chip>
-                  </cp-col>
+                  <v-row no-gutters>
+                    <v-col cols="4" class="text-left">
+                      <cp-label class="mt-2">ไม่ผ่าน</cp-label>
+                    </v-col>
+                    <v-col cols="8" class="cp-body">
+                      <v-chip
+                        v-if="item.deflect_status_0_count != 0"
+                        color="error"
+                      >
+                        {{ item.deflect_status_0_count }}
+                      </v-chip>
+                      <v-chip v-else color="grey lighten-4">0</v-chip>
+                    </v-col>
+                  </v-row>
+                </template>
+
+                <template #item.deflect_status_1_count="{ item }">
+                  <v-row no-gutters>
+                    <v-col cols="4" class="text-left">
+                      <cp-label class="mt-2">ผ่าน</cp-label>
+                    </v-col>
+                    <v-col cols="8" class="cp-body">
+                      <v-chip
+                        v-if="item.deflect_status_1_count != 0"
+                        color="success"
+                      >
+                        {{ item.deflect_status_1_count }}
+                      </v-chip>
+                      <v-chip v-else color="grey lighten-4">0</v-chip>
+                    </v-col>
+                  </v-row>
                 </template>
 
                 <template #item.deflect_status_null_count="{ item }">
-                  <cp-col min="80">
-                    <v-chip
-                      v-if="item.deflect_count == 0"
-                      color="grey lighten-4"
-                    >
-                      0
-                    </v-chip>
-                    <v-chip v-else>
-                      {{ item.deflect_status_null_count }}
-                    </v-chip>
-                  </cp-col>
-                </template>
-
-                <template #item.actions="{ item }">
-                  <cp-col
-                    v-if="
-                      inspectionDetail.report_status == 'approval' ||
-                      inspectionDetail.report_status == 'approved'
-                    "
-                    min="100"
-                  >
-                    <v-icon disabled class="mr-2">
-                      mdi-pencil-off-outline
-                    </v-icon>
-                    <v-icon disabled> mdi-delete-off-outline </v-icon>
-                  </cp-col>
-                  <cp-col v-else min="100">
-                    <v-icon
-                      class="mr-2"
-                      @click="
-                        (editLocation.dialog = true),
-                          (editLocation.locationSelectBefore =
-                            item.location_name),
-                          (editLocation.locationId = item.location_id)
-                      "
-                    >
-                      mdi-pencil-outline
-                    </v-icon>
-                    <v-icon
-                      @click="
-                        (deleteLocation.dialog = true),
-                          (deleteLocation.data = item)
-                      "
-                    >
-                      mdi-trash-can-outline
-                    </v-icon>
-                  </cp-col>
+                  <v-row no-gutters>
+                    <v-col cols="4" class="text-left">
+                      <cp-label class="mt-2">ไม่มีสถานะ</cp-label>
+                    </v-col>
+                    <v-col cols="8" class="cp-body">
+                      <v-chip
+                        v-if="item.deflect_count == 0"
+                        color="grey lighten-4"
+                      >
+                        0
+                      </v-chip>
+                      <v-chip v-else>
+                        {{ item.deflect_status_null_count }}
+                      </v-chip>
+                    </v-col>
+                  </v-row>
                 </template>
 
                 <template #item.detail="{ item }">
-                  <v-btn
-                    color="primary"
-                    elevation="0"
-                    class="my-4"
-                    outlined
-                    block
-                    @click="
-                      $router.push(
-                        `/projects/list/detail/inspection/location-deflect?id=${item.location_id}`
-                      )
-                    "
-                  >
-                    จัดการ Deflect
-                  </v-btn>
+                  <div class="d-flex align-center mt-4 mb-6">
+                    <v-menu offset-y>
+                      <template #activator="{ on, attrs }">
+                        <v-btn
+                          :disabled="
+                            inspectionDetail.report_status == 'approval' ||
+                            inspectionDetail.report_status == 'approved'
+                          "
+                          outlined
+                          v-bind="attrs"
+                          v-on="on"
+                        >
+                          <div class="cp-text-capitalize">จัดการ Location</div>
+                        </v-btn>
+                      </template>
+                      <v-list>
+                        <v-list-item
+                          @click="
+                            (editLocation.dialog = true),
+                              (editLocation.locationSelectBefore =
+                                item.location_name),
+                              (editLocation.locationId = item.location_id)
+                          "
+                        >
+                          แก้ไขรายละเอียด
+                        </v-list-item>
+                        <v-list-item
+                          class="error--text"
+                          @click="
+                            (deleteLocation.dialog = true),
+                              (deleteLocation.data = item)
+                          "
+                        >
+                          ลบ Location
+                        </v-list-item>
+                      </v-list>
+                    </v-menu>
+                    <v-spacer />
+                    <v-btn
+                      color="primary"
+                      elevation="0"
+                      outlined
+                      @click="
+                        $router.push(
+                          `/projects/list/detail/inspection/location-deflect?id=${item.location_id}`
+                        )
+                      "
+                    >
+                      <div>จัดการ Deflect</div>
+                    </v-btn>
+                  </div>
                 </template>
 
                 <template #no-data>
-                  <div class="my-6">ไม่มีข้อมูล</div>
+                  <div class="text-center">ไม่มีข้อมูล Location</div>
                 </template>
               </v-data-table>
             </v-tab-item>
@@ -232,8 +295,10 @@
                 :items="systemDataList"
                 :search="systemSearch"
                 :loading="systemDataLoading"
-                class="elevation-0"
+                :items-per-page="-1"
+                hide-default-header
                 hide-default-footer
+                class="elevation-0"
               >
                 <template #top>
                   <v-btn
@@ -261,428 +326,185 @@
                     hide-details
                     outlined
                     dense
+                    class="mb-6"
                   />
                 </template>
 
-                <template #item.on="{ item, index }">
-                  <cp-col min="20">
-                    {{ index + 1 }}
-                  </cp-col>
+                <template #item.card_action="{ item, index }">
+                  <div class="d-flex align-center mt-4 mb-6">
+                    <v-btn
+                      :disabled="
+                        index + 1 === 1 ||
+                        inspectionDetail.report_status == 'approval' ||
+                        inspectionDetail.report_status == 'approved'
+                      "
+                      small
+                      elevation="0"
+                      color="#DBEEFE"
+                      @click="moveSystemItemList('up', item.system_id)"
+                    >
+                      <v-icon color="info">mdi-arrow-up-bold</v-icon>
+                    </v-btn>
+                    <v-spacer />
+                    <div class="cp-body cp-semibold primary--text">
+                      ลำดับ:
+                      {{ index + 1 }}
+                    </div>
+                    <v-spacer />
+                    <v-btn
+                      :disabled="
+                        systemDataList.length === index + 1 ||
+                        inspectionDetail.report_status == 'approval' ||
+                        inspectionDetail.report_status == 'approved'
+                      "
+                      small
+                      elevation="0"
+                      color="#DBEEFE"
+                      @click="moveSystemItemList('down', item.system_id)"
+                    >
+                      <v-icon color="info">mdi-arrow-down-bold</v-icon>
+                    </v-btn>
+                  </div>
                 </template>
 
                 <template #item.system_name="{ item }">
-                  {{ item.system_name }}
+                  <v-row no-gutters>
+                    <v-col cols="4" class="text-left">
+                      <cp-label>System</cp-label>
+                    </v-col>
+                    <v-col cols="8" class="cp-body">
+                      <v-card color="transparent" flat>
+                        {{ item.system_name }}
+                      </v-card>
+                    </v-col>
+                  </v-row>
                 </template>
 
                 <template #item.deflect_count="{ item }">
-                  <cp-col min="80">
-                    <v-chip v-if="item.deflect_count != 0" color="primary">
-                      {{ item.deflect_count }}
-                    </v-chip>
-                    <v-chip v-else color="grey lighten-4">0</v-chip>
-                  </cp-col>
-                </template>
-
-                <template #item.deflect_status_1_count="{ item }">
-                  <cp-col min="80">
-                    <v-chip
-                      v-if="item.deflect_status_1_count != 0"
-                      color="success"
-                    >
-                      {{ item.deflect_status_1_count }}
-                    </v-chip>
-                    <v-chip v-else color="grey lighten-4">0</v-chip>
-                  </cp-col>
+                  <v-row no-gutters>
+                    <v-col cols="4" class="text-left">
+                      <cp-label class="mt-2">Deflect ทั้งหมด</cp-label>
+                    </v-col>
+                    <v-col cols="8" class="cp-body">
+                      <v-chip v-if="item.deflect_count != 0" color="primary">
+                        {{ item.deflect_count }}
+                      </v-chip>
+                      <v-chip v-else color="grey lighten-4">0</v-chip>
+                    </v-col>
+                  </v-row>
                 </template>
 
                 <template #item.deflect_status_0_count="{ item }">
-                  <cp-col min="80">
-                    <v-chip
-                      v-if="item.deflect_status_0_count != 0"
-                      color="error"
-                    >
-                      {{ item.deflect_status_0_count }}
-                    </v-chip>
-                    <v-chip v-else color="grey lighten-4">0</v-chip>
-                  </cp-col>
+                  <v-row no-gutters>
+                    <v-col cols="4" class="text-left">
+                      <cp-label class="mt-2">ไม่ผ่าน</cp-label>
+                    </v-col>
+                    <v-col cols="8" class="cp-body">
+                      <v-chip
+                        v-if="item.deflect_status_0_count != 0"
+                        color="error"
+                      >
+                        {{ item.deflect_status_0_count }}
+                      </v-chip>
+                      <v-chip v-else color="grey lighten-4">0</v-chip>
+                    </v-col>
+                  </v-row>
+                </template>
+
+                <template #item.deflect_status_1_count="{ item }">
+                  <v-row no-gutters>
+                    <v-col cols="4" class="text-left">
+                      <cp-label class="mt-2">ผ่าน</cp-label>
+                    </v-col>
+                    <v-col cols="8" class="cp-body">
+                      <v-chip
+                        v-if="item.deflect_status_1_count != 0"
+                        color="success"
+                      >
+                        {{ item.deflect_status_1_count }}
+                      </v-chip>
+                      <v-chip v-else color="grey lighten-4">0</v-chip>
+                    </v-col>
+                  </v-row>
                 </template>
 
                 <template #item.deflect_status_null_count="{ item }">
-                  <cp-col min="80">
-                    <v-chip
-                      v-if="item.deflect_count == 0"
-                      color="grey lighten-4"
-                    >
-                      0
-                    </v-chip>
-                    <v-chip v-else>
-                      {{ item.deflect_status_null_count }}
-                    </v-chip>
-                  </cp-col>
-                </template>
-
-                <template #item.actions="{ item }">
-                  <cp-col
-                    v-if="
-                      inspectionDetail.report_status == 'approval' ||
-                      inspectionDetail.report_status == 'approved'
-                    "
-                    min="100"
-                  >
-                    <v-icon disabled class="mr-2">
-                      mdi-pencil-off-outline
-                    </v-icon>
-                    <v-icon disabled> mdi-delete-off-outline </v-icon>
-                  </cp-col>
-                  <cp-col v-else min="100">
-                    <v-icon
-                      class="mr-2"
-                      @click="
-                        (editSystem.dialog = true),
-                          (editSystem.systemSelectBefore = item.system_name),
-                          (editSystem.systemId = item.system_id)
-                      "
-                    >
-                      mdi-pencil-outline
-                    </v-icon>
-                    <v-icon
-                      @click="
-                        (deleteSystem.dialog = true), (deleteSystem.data = item)
-                      "
-                    >
-                      mdi-trash-can-outline
-                    </v-icon>
-                  </cp-col>
+                  <v-row no-gutters>
+                    <v-col cols="4" class="text-left">
+                      <cp-label class="mt-2">ไม่มีสถานะ</cp-label>
+                    </v-col>
+                    <v-col cols="8" class="cp-body">
+                      <v-chip
+                        v-if="item.deflect_count == 0"
+                        color="grey lighten-4"
+                      >
+                        0
+                      </v-chip>
+                      <v-chip v-else>
+                        {{ item.deflect_status_null_count }}
+                      </v-chip>
+                    </v-col>
+                  </v-row>
                 </template>
 
                 <template #item.detail="{ item }">
-                  <v-btn
-                    color="primary"
-                    elevation="0"
-                    class="my-4"
-                    outlined
-                    block
-                    @click="
-                      $router.push(
-                        `/projects/list/detail/inspection/system-deflect?id=${item.system_id}`
-                      )
-                    "
-                  >
-                    จัดการ Deflect
-                  </v-btn>
-                </template>
-
-                <template #no-data>
-                  <div class="my-6">ไม่มีข้อมูล</div>
-                </template>
-              </v-data-table>
-            </v-tab-item>
-
-            <!-- Image Storage -->
-            <v-tab-item>
-              <div class="d-flex align-center pb-6">
-                <div>
-                  จำนวนรูปทั้งหมด:
-                  <b class="cp-header-2 cp-semibold">
-                    {{
-                      imageStorage.imageList.length +
-                      imageStorage.imageUsageList.length
-                    }}
-                  </b>
-                  รูป
-                </div>
-                <v-spacer />
-                <v-btn
-                  elevation="0"
-                  height="36"
-                  color="primary"
-                  @click="imageUpload.dialog = true"
-                >
-                  <div class="cp-text-capitalize">
-                    <v-icon left>mdi-image-plus-outline</v-icon>
-                    อัพโหลดรูป
-                  </div>
-                </v-btn>
-              </div>
-
-              <!-- Image Usage List -->
-              <div class="d-flex pb-6">
-                <div class="cp-header-2 cp-semibold">
-                  รูปที่ใช้งานอยู่ใน Location และ System
-                </div>
-              </div>
-
-              <div
-                v-if="imageStorage.imageUsageList.length == 0"
-                class="cp-no-image"
-              >
-                <div class="text-center">
-                  <v-icon large color="grey" class="mb-2">
-                    mdi-image-remove-outline
-                  </v-icon>
-                  <div>ยังไม่มีรูปที่ใช้งาน</div>
-                </div>
-              </div>
-              <v-row v-else>
-                <v-col
-                  v-for="(list, index) in imageStorage.imageUsageList"
-                  :key="index + 'imageUsageList'"
-                  class="d-flex child-flex"
-                  cols="3"
-                >
-                  <v-card outlined>
-                    <v-img
-                      :src="list.image_path"
-                      aspect-ratio="1.4"
-                      class="grey lighten-2"
-                    >
-                      <div class="d-flex justify-end mt-1 mx-1">
-                        <v-chip
-                          v-if="list.location_tag"
-                          color="primary"
-                          class="mr-2"
-                          small
-                          label
-                        >
-                          <v-icon small left>mdi-home-map-marker</v-icon>
-                          LOCATION
-                        </v-chip>
-                        <v-chip
-                          v-if="list.system_tag"
-                          color="success"
-                          small
-                          label
-                        >
-                          <v-icon small left>mdi-overscan</v-icon>
-                          SYSTEM
-                        </v-chip>
-                        <v-spacer />
-                        <v-btn
-                          icon
-                          small
-                          color="white"
-                          @click="
-                            (imagePreview.dialog = true),
-                              (imagePreview.imageData = list)
-                          "
-                        >
-                          <v-icon>mdi-arrow-expand-all</v-icon>
-                        </v-btn>
-                      </div>
-                      <template #placeholder>
-                        <v-row
-                          class="fill-height ma-0"
-                          align="center"
-                          justify="center"
-                        >
-                          <v-progress-circular
-                            indeterminate
-                            color="grey lighten-5"
-                          />
-                        </v-row>
-                      </template>
-                    </v-img>
-                    <div class="pa-4">
-                      <div v-if="list.image_name" class="truncate">
-                        {{ list.image_name }}
-                      </div>
-                      <div v-else class="cp-text-disable">ไม่มีชื่อรูป</div>
-                      <div
-                        class="image-box-detail cp-caption cp-text-description"
-                      >
-                        <div class="image-user truncate">
-                          <v-icon small>mdi-account-outline</v-icon>
-                          {{ list.uploaded_by.code_name }}
-                        </div>
-                        <div class="image-size">
-                          <v-icon small>mdi-folder-swap-outline</v-icon>
-                          {{ convertBytes(list.image_size) }}
-                        </div>
-                      </div>
-                      <v-divider class="my-2" />
-                      <div class="image-footer">
-                        <div class="cp-caption cp-text-description">
-                          <v-icon small>mdi-calendar</v-icon>
-                          <span>{{ formatDateShot(list.uploaded_at) }}</span>
-                        </div>
-                        <v-spacer />
+                  <div class="d-flex align-center mt-4 mb-6">
+                    <v-menu offset-y>
+                      <template #activator="{ on, attrs }">
                         <v-btn
                           :disabled="
                             inspectionDetail.report_status == 'approval' ||
                             inspectionDetail.report_status == 'approved'
                           "
-                          icon
-                          small
-                          @click="
-                            (imageNameEdit.dialog = true),
-                              (imageNameEdit.imageData = list),
-                              (imageNameEdit.imageName = list.image_name)
-                          "
+                          outlined
+                          v-bind="attrs"
+                          v-on="on"
                         >
-                          <v-icon
-                            v-if="
-                              inspectionDetail.report_status == 'approval' ||
-                              inspectionDetail.report_status == 'approved'
-                            "
-                            small
-                          >
-                            mdi-pencil-off-outline
-                          </v-icon>
-                          <v-icon v-else small>mdi-pencil-outline</v-icon>
+                          <div class="cp-text-capitalize">จัดการ System</div>
                         </v-btn>
-                      </div>
-                    </div>
-                  </v-card>
-                </v-col>
-              </v-row>
-
-              <!-- Image List -->
-              <div class="pt-6"></div>
-              <v-divider class="mt-6" />
-              <div class="d-flex align-center pt-6 pb-2">
-                <div class="cp-header-2 cp-semibold">รูปที่ยังไม่ได้ใช้งาน</div>
-                <v-spacer />
-                <v-btn
-                  v-if="imageMultipleDelete.active"
-                  :disabled="imageMultipleDelete.imageDataList.length < 2"
-                  elevation="0"
-                  height="36"
-                  color="error"
-                  class="mr-4"
-                  @click="imageMultipleDelete.dialog = true"
-                >
-                  <div class="cp-text-capitalize">
-                    <v-icon left>mdi-trash-can-outline</v-icon>
-                    ลบ {{ imageMultipleDelete.imageDataList.length }}/15 รูป
-                  </div>
-                </v-btn>
-                <v-switch
-                  v-model="imageMultipleDelete.active"
-                  label="ลบหลายรูป"
-                  inset
-                ></v-switch>
-              </div>
-              <div
-                v-if="imageStorage.imageList.length == 0"
-                class="cp-no-image"
-              >
-                <div class="text-center">
-                  <v-icon large color="grey" class="mb-2">
-                    mdi-image-remove-outline
-                  </v-icon>
-                  <div>ยังไม่มีรูปภาพ</div>
-                </div>
-              </div>
-              <v-row v-else>
-                <v-col
-                  v-for="(list, index) in imageStorage.imageList"
-                  :key="index + 'imageList'"
-                  class="d-flex child-flex"
-                  cols="3"
-                >
-                  <v-card
-                    :class="list.checked ? 'select-delete-image' : ''"
-                    outlined
-                    @mousedown="handleMouseDown(list)"
-                    @mouseup="handleMouseUp"
-                  >
-                    <v-img
-                      :src="list.image_path"
-                      aspect-ratio="1.4"
-                      class="grey lighten-2"
-                    >
-                      <div class="d-flex justify-end mt-1 mr-1">
-                        <div
-                          v-if="imageMultipleDelete.active"
-                          class="cp-checkbox mt-1 ml-2"
-                        >
-                          <input
-                            v-model="list.checked"
-                            :disabled="
-                              imageMultipleDelete.imageDataList.length == 15 &&
-                              !list.checked
-                            "
-                            type="checkbox"
-                            @click="selectImageDeleteMultiple(list)"
-                          />
-                        </div>
-                        <v-spacer />
-                        <v-btn
-                          icon
-                          small
-                          color="white"
-                          @click="
-                            (imagePreview.dialog = true),
-                              (imagePreview.imageData = list)
-                          "
-                        >
-                          <v-icon>mdi-arrow-expand-all</v-icon>
-                        </v-btn>
-                      </div>
-                      <template #placeholder>
-                        <v-row
-                          class="fill-height ma-0"
-                          align="center"
-                          justify="center"
-                        >
-                          <v-progress-circular
-                            indeterminate
-                            color="grey lighten-5"
-                          />
-                        </v-row>
                       </template>
-                    </v-img>
-                    <div class="pa-4">
-                      <div v-if="list.image_name" class="truncate">
-                        {{ list.image_name }}
-                      </div>
-                      <div v-else class="cp-text-disable">ไม่มีชื่อรูป</div>
-                      <div
-                        class="image-box-detail cp-caption cp-text-description"
-                      >
-                        <div class="image-user truncate">
-                          <v-icon small>mdi-account-outline</v-icon>
-                          {{ list.uploaded_by.code_name }}
-                        </div>
-                        <div class="image-size">
-                          <v-icon small>mdi-folder-swap-outline</v-icon>
-                          {{ convertBytes(list.image_size) }}
-                        </div>
-                      </div>
-                      <v-divider class="my-2" />
-                      <div class="image-footer">
-                        <div class="cp-caption cp-text-description">
-                          <v-icon small>mdi-calendar</v-icon>
-                          <span>{{ formatDateShot(list.uploaded_at) }}</span>
-                        </div>
-                        <v-spacer />
-                        <v-btn
-                          icon
-                          small
+                      <v-list>
+                        <v-list-item
                           @click="
-                            (imageNameEdit.dialog = true),
-                              (imageNameEdit.imageData = list),
-                              (imageNameEdit.imageName = list.image_name)
+                            (editSystem.dialog = true),
+                              (editSystem.systemSelectBefore =
+                                item.system_name),
+                              (editSystem.systemId = item.system_id)
                           "
                         >
-                          <v-icon small> mdi-pencil-outline </v-icon>
-                        </v-btn>
-                        <v-btn
-                          :disabled="imageMultipleDelete.active"
-                          icon
-                          small
+                          แก้ไขรายละเอียด
+                        </v-list-item>
+                        <v-list-item
+                          class="error--text"
                           @click="
-                            (imageDelete.dialog = true),
-                              (imageDelete.imageData = list)
+                            (deleteSystem.dialog = true),
+                              (deleteSystem.data = item)
                           "
                         >
-                          <v-icon small> mdi-trash-can-outline </v-icon>
-                        </v-btn>
-                      </div>
-                    </div>
-                  </v-card>
-                </v-col>
-              </v-row>
+                          ลบ System
+                        </v-list-item>
+                      </v-list>
+                    </v-menu>
+                    <v-spacer />
+                    <v-btn
+                      color="primary"
+                      elevation="0"
+                      outlined
+                      @click="
+                        $router.push(
+                          `/projects/list/detail/inspection/system-deflect?id=${item.system_id}`
+                        )
+                      "
+                    >
+                      <div class="cp-text-capitalize">จัดการ Deflect</div>
+                    </v-btn>
+                  </div>
+                </template>
+
+                <template #no-data>
+                  <div>ไม่มีข้อมูล System</div>
+                </template>
+              </v-data-table>
             </v-tab-item>
           </v-tabs-items>
         </cp-card>
@@ -905,7 +727,7 @@
           </v-btn>
         </v-card-title>
         <v-card-text>
-          คุณแน่ใจหรือไม่ที่คุณจะลบ Location นี้ออกจากรายการ?
+          คุณแน่ใจหรือไม่ที่คุณจะลบ Location นี้?
           <v-card outlined class="mt-4">
             <v-card-text>
               Deflect ที่จะถูกลบไปด้วย:
@@ -916,8 +738,8 @@
             </v-card-text>
           </v-card>
           <v-row v-if="deleteLocation.loading" class="mt-4">
-            <v-col cols="3"> ลบ Deflect </v-col>
-            <v-col cols="9">
+            <v-col cols="4"> ลบ Deflect </v-col>
+            <v-col cols="8">
               <v-progress-linear
                 v-model="deleteLocation.deleteProgress"
                 color="primary"
@@ -1157,7 +979,7 @@
           </v-btn>
         </v-card-title>
         <v-card-text>
-          คุณแน่ใจหรือไม่ที่คุณจะลบ System นี้ออกจากรายการ?
+          คุณแน่ใจหรือไม่ที่คุณจะลบ System นี้?
           <v-card outlined class="mt-4">
             <v-card-text>
               Deflect ที่จะถูกลบไปด้วย:
@@ -1168,8 +990,8 @@
             </v-card-text>
           </v-card>
           <v-row v-if="deleteSystem.loading" class="mt-4">
-            <v-col cols="3"> ลบ Deflect </v-col>
-            <v-col cols="9">
+            <v-col cols="4"> ลบ Deflect </v-col>
+            <v-col cols="8">
               <v-progress-linear
                 v-model="deleteSystem.deleteProgress"
                 color="primary"
@@ -1436,50 +1258,6 @@
         </v-card-text>
       </v-card>
     </v-dialog>
-
-    <!-- Edit Image Name -->
-    <v-dialog
-      v-model="imageNameEdit.dialog"
-      :persistent="imageNameEdit.loading"
-      width="400"
-      transition="dialog-transition"
-      content-class="elevation-0"
-    >
-      <v-card>
-        <v-card-title>
-          แก้ไขชื่อรูป
-          <v-spacer />
-          <v-btn
-            :disabled="imageNameEdit.loading"
-            icon
-            class="mt-n4 mr-n4"
-            @click="imageNameEdit.dialog = false"
-          >
-            <v-icon>mdi-close</v-icon>
-          </v-btn>
-        </v-card-title>
-        <v-card-text>
-          <cp-label> ชื่อรูป </cp-label>
-          <v-text-field
-            v-model="imageNameEdit.imageName"
-            :disabled="imageNameEdit.loading"
-            outlined
-            dense
-          />
-          <div class="mt-6 d-flex flex-row-reverse">
-            <v-btn
-              :loading="imageNameEdit.loading"
-              elevation="0"
-              height="36"
-              color="primary"
-              @click="onEditImageName()"
-            >
-              <div class="cp-text-capitalize">บันทึก</div>
-            </v-btn>
-          </div>
-        </v-card-text>
-      </v-card>
-    </v-dialog>
   </div>
 </template>
 
@@ -1497,27 +1275,13 @@ export default {
       locationDataLoading: false,
       locationSearch: "",
       locationHeaders: [
-        { text: "ลำดับ", align: "center", value: "on", sortable: false },
-        { text: "Location", value: "location_name", sortable: false },
-        { text: "Deflect", value: "deflect_count", sortable: false },
-        {
-          text: "ยังไม่ได้ตรวจ",
-          value: "deflect_status_null_count",
-          sortable: false,
-        },
-        { text: "ผ่าน", value: "deflect_status_1_count", sortable: false },
-        { text: "ไม่ผ่าน", value: "deflect_status_0_count", sortable: false },
-        {
-          text: "การดำเนินการ",
-          align: "center",
-          value: "actions",
-          sortable: false,
-        },
-        {
-          align: "center",
-          value: "detail",
-          sortable: false,
-        },
+        { value: "card_action" },
+        { value: "location_name" },
+        { value: "deflect_count" },
+        { value: "deflect_status_0_count" },
+        { value: "deflect_status_1_count" },
+        { value: "deflect_status_null_count" },
+        { value: "detail" },
       ],
       locationDataList: [],
       createLocation: {
@@ -1564,27 +1328,13 @@ export default {
       systemDataLoading: false,
       systemSearch: "",
       systemHeaders: [
-        { text: "ลำดับ", align: "center", value: "on", sortable: false },
-        { text: "System", value: "system_name", sortable: false },
-        { text: "Deflect", value: "deflect_count", sortable: false },
-        {
-          text: "ยังไม่ได้ตรวจ",
-          value: "deflect_status_null_count",
-          sortable: false,
-        },
-        { text: "ผ่าน", value: "deflect_status_1_count", sortable: false },
-        { text: "ไม่ผ่าน", value: "deflect_status_0_count", sortable: false },
-        {
-          text: "การดำเนินการ",
-          align: "center",
-          value: "actions",
-          sortable: false,
-        },
-        {
-          align: "center",
-          value: "detail",
-          sortable: false,
-        },
+        { value: "card_action" },
+        { value: "system_name" },
+        { value: "deflect_count" },
+        { value: "deflect_status_0_count" },
+        { value: "deflect_status_1_count" },
+        { value: "deflect_status_null_count" },
+        { value: "detail" },
       ],
       systemDataList: [],
       createSystem: {
@@ -1639,10 +1389,6 @@ export default {
         imageMaxList: false,
         uploadPersen: 0,
       },
-      imagePreview: {
-        dialog: false,
-        imageData: null,
-      },
       imageDelete: {
         loading: false,
         dialog: false,
@@ -1660,7 +1406,12 @@ export default {
         imageData: null,
         imageName: "",
       },
+
       isMouseDown: false,
+      imagePreview: {
+        dialog: false,
+        imageData: null,
+      },
     };
   },
 
@@ -1669,15 +1420,7 @@ export default {
   },
 
   computed: {
-    ...mapState("user", [
-      "accountId",
-      "avatarPath",
-      "firstName",
-      "lastName",
-      "codeName",
-      "role",
-      "appRoleList",
-    ]),
+    ...mapState("user", ["role"]),
   },
 
   watch: {
@@ -1730,6 +1473,8 @@ export default {
       if (newValue) {
         this.inspectionCheckHealthy();
         this.getLocationDeflectList();
+      } else {
+        this.deleteLocation.deleteProgress = 0;
       }
     },
 
@@ -1758,6 +1503,8 @@ export default {
       if (newValue) {
         this.inspectionCheckHealthy();
         this.getSystemDeflectList();
+      } else {
+        this.deleteSystem.deleteProgress = 0;
       }
     },
 
@@ -1917,7 +1664,7 @@ export default {
           )
           .then(({ data }) => {
             this.locationDataLoading = false;
-            data.data.sort((a, b) => a.id - b.id);
+            data.data.sort((a, b) => a.item_number - b.item_number);
             this.locationDataList = data.data;
           })
           .catch(({ response }) => {
@@ -2383,7 +2130,7 @@ export default {
           )
           .then(({ data }) => {
             this.systemDataLoading = false;
-            data.data.sort((a, b) => a.id - b.id);
+            data.data.sort((a, b) => a.item_number - b.item_number);
             this.systemDataList = data.data;
           })
           .catch(({ response }) => {
@@ -3155,6 +2902,70 @@ export default {
         message: error,
       });
     },
+
+    async moveLocationItemList(action, locationId) {
+      const accessToken = await this.getAccessToken();
+      if (accessToken) {
+        this.$axios
+          .post(
+            `${process.env.API_ENDPOINT}/v1/project/inspection/location/move`,
+            {
+              project_id: this.inspectionDetail.project_id,
+              inspection_id: this.inspectionDetail.inspection_id,
+              type_action: action,
+              location_id: locationId,
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+              },
+            }
+          )
+          .then(({ data }) => {
+            this.getLocationList();
+          })
+          .catch(({ response }) => {
+            this.onNotify({
+              notifyValue: true,
+              type: "error",
+              title: "ดำเนินการไม่สำเร็จ",
+              message: response,
+            });
+          });
+      }
+    },
+
+    async moveSystemItemList(action, systemId) {
+      const accessToken = await this.getAccessToken();
+      if (accessToken) {
+        this.$axios
+          .post(
+            `${process.env.API_ENDPOINT}/v1/project/inspection/system/move`,
+            {
+              project_id: this.inspectionDetail.project_id,
+              inspection_id: this.inspectionDetail.inspection_id,
+              type_action: action,
+              system_id: systemId,
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+              },
+            }
+          )
+          .then(({ data }) => {
+            this.getSystemList();
+          })
+          .catch(({ response }) => {
+            this.onNotify({
+              notifyValue: true,
+              type: "error",
+              title: "ดำเนินการไม่สำเร็จ",
+              message: response,
+            });
+          });
+      }
+    },
   },
 };
 </script>
@@ -3209,116 +3020,14 @@ export default {
   border: 2px dashed var(--base-primary);
   color: var(--base-primary);
 }
-
 .add-image-box .add-image-box-icon {
   color: var(--gray-300);
 }
-
 .add-image-box:hover .add-image-box-icon {
   color: var(--base-primary);
 }
 
 .select-delete-image {
   outline: 4px solid var(--green-300);
-}
-
-/* Checkbox */
-@supports (-webkit-appearance: none) or (-moz-appearance: none) {
-  .cp-checkbox input[type="checkbox"] {
-    --active: var(--base-success);
-    --active-inner: #fff;
-    --focus: 2px var(--green-opacity-1);
-    --border: #bbc1e1;
-    --border-hover: var(--base-success);
-    --background: #fff;
-    --disabled: #f6f8ff;
-    --disabled-inner: #e1e6f9;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    height: 21px;
-    outline: none;
-    display: inline-block;
-    vertical-align: top;
-    position: relative;
-    margin: 0;
-    cursor: pointer;
-    border: 1px solid var(--bc, var(--border));
-    background: var(--b, var(--background));
-    transition: background 0.3s, border-color 0.3s, box-shadow 0.2s;
-  }
-  .cp-checkbox input[type="checkbox"]:after {
-    content: "";
-    display: block;
-    left: 0;
-    top: 0;
-    position: absolute;
-    transition: transform var(--d-t, 0.3s) var(--d-t-e, ease),
-      opacity var(--d-o, 0.2s);
-  }
-  .cp-checkbox input[type="checkbox"]:checked {
-    --b: var(--active);
-    --bc: var(--active);
-    --d-o: 0.3s;
-    --d-t: 0.6s;
-    --d-t-e: cubic-bezier(0.2, 0.85, 0.32, 1.2);
-  }
-  .cp-checkbox input[type="checkbox"]:disabled {
-    --b: var(--disabled);
-    cursor: not-allowed;
-    opacity: 0.9;
-  }
-  .cp-checkbox input[type="checkbox"]:disabled:checked {
-    --b: var(--disabled-inner);
-    --bc: var(--border);
-  }
-  .cp-checkbox input[type="checkbox"]:disabled + label {
-    cursor: not-allowed;
-  }
-  .cp-checkbox input[type="checkbox"]:hover:not(:checked):not(:disabled) {
-    --bc: var(--border-hover);
-  }
-  .cp-checkbox input[type="checkbox"]:focus {
-    box-shadow: 0 0 0 var(--focus);
-  }
-  .cp-checkbox input[type="checkbox"]:not(.switch) {
-    width: 21px;
-  }
-  .cp-checkbox input[type="checkbox"]:not(.switch):after {
-    opacity: var(--o, 0);
-  }
-  .cp-checkbox input[type="checkbox"]:not(.switch):checked {
-    --o: 1;
-  }
-  .cp-checkbox input[type="checkbox"] + label {
-    display: inline-block;
-    vertical-align: middle;
-    cursor: pointer;
-    margin-left: 4px;
-  }
-
-  .cp-checkbox input[type="checkbox"]:not(.switch) {
-    border-radius: 4px;
-  }
-  .cp-checkbox input[type="checkbox"]:not(.switch):after {
-    width: 5px;
-    height: 9px;
-    border: 2px solid var(--active-inner);
-    border-top: 0;
-    border-left: 0;
-    left: 7px;
-    top: 4px;
-    transform: rotate(var(--r, 20deg));
-  }
-  .cp-checkbox input[type="checkbox"]:not(.switch):checked {
-    --r: 43deg;
-  }
-}
-
-.cp-checkbox * {
-  box-sizing: inherit;
-}
-.cp-checkbox *:before,
-.cp-checkbox *:after {
-  box-sizing: inherit;
 }
 </style>

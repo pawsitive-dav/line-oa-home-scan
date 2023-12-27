@@ -17,7 +17,13 @@
       </v-container>
     </v-main>
 
-    <v-footer color="white" fixed app class="py-4 justify-space-between">
+    <v-footer
+      color="white"
+      fixed
+      app
+      class="py-4 justify-space-between"
+      style="box-shadow: 0px -4px 16px 0px rgba(0, 0, 0, 0.1)"
+    >
       <v-btn fab outlined small color="primary" class="mx-2" to="/">
         <v-icon>mdi-home-outline</v-icon>
       </v-btn>
@@ -93,16 +99,16 @@ export default {
     },
   },
 
-  mounted() {
-    // เพิ่ม event listener เพื่อตรวจสอบความกว้างของหน้าต่างเมื่อ component ถูก mount
-    this.getWindowWidth();
-    window.addEventListener("resize", this.getWindowWidth);
-  },
+  // mounted() {
+  //   // เพิ่ม event listener เพื่อตรวจสอบความกว้างของหน้าต่างเมื่อ component ถูก mount
+  //   this.getWindowWidth();
+  //   window.addEventListener("resize", this.getWindowWidth);
+  // },
 
-  beforeDestroy() {
-    // ลบ event listener เมื่อ component ถูก destroy เพื่อป้องกันการหลุด memory
-    window.removeEventListener("resize", this.getWindowWidth);
-  },
+  // beforeDestroy() {
+  //   // ลบ event listener เมื่อ component ถูก destroy เพื่อป้องกันการหลุด memory
+  //   window.removeEventListener("resize", this.getWindowWidth);
+  // },
 
   methods: {
     ...mapActions("user", [
@@ -112,18 +118,18 @@ export default {
       "setAppRoleStatus",
     ]),
 
-    getWindowWidth() {
-      // ดึงค่าความกว้างของหน้าต่าง
-      this.windowWidth = window.innerWidth;
+    // getWindowWidth() {
+    //   // ดึงค่าความกว้างของหน้าต่าง
+    //   this.windowWidth = window.innerWidth;
 
-      if (this.windowWidth > 500) {
-        if (!this.displayBlock) {
-          this.displayBlock = true;
-        }
-      } else if (this.displayBlock) {
-        this.displayBlock = false;
-      }
-    },
+    //   if (this.windowWidth > 500) {
+    //     if (!this.displayBlock) {
+    //       this.displayBlock = true;
+    //     }
+    //   } else if (this.displayBlock) {
+    //     this.displayBlock = false;
+    //   }
+    // },
 
     scrollToTop() {
       window.scrollTo({

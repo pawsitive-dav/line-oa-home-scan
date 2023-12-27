@@ -1,4 +1,3 @@
-<!-- eslint-disable vue/no-unused-vars -->
 <!-- eslint-disable vue/valid-v-slot -->
 <template>
   <div>
@@ -107,9 +106,9 @@
         <v-row>
           <v-col cols="12">
             <!-- รายการตรวจ -->
-            <cp-card class="pa-4">
-              <div class="d-flex pb-4">
-                <div class="cp-title pb-4">รายการตรวจ</div>
+            <cp-card>
+              <div class="d-flex pa-4">
+                <div class="cp-title">รายการตรวจ</div>
                 <v-spacer />
                 <v-btn
                   v-if="role != 'Checker'"
@@ -250,18 +249,193 @@
                       <span class="cp-text-description">วันที่เข้าตรวจ:</span>
                       <b>{{ formatDate(list.working_date) }}</b>
                     </div>
-                    <div>
+                    <div class="pt-3">
                       <span class="cp-text-description">สร้างโดย:</span>
                       <b class="primary--text">
-                        ({{ JSON.parse(list.created_by).code_name }})
+                        ({{ list.created_by.code_name }})
                         {{
-                          JSON.parse(list.created_by).first_name +
+                          list.created_by.first_name +
                           " " +
-                          JSON.parse(list.created_by).last_name
+                          list.created_by.last_name
                         }}</b
                       >
                     </div>
                   </div>
+                  <v-divider class="my-4" />
+                  <div class="d-flex align-center">
+                    <div class="cp-body"><b>หมายเหตุ : </b> รายงาน</div>
+                    <v-spacer />
+                    <v-btn
+                      :disabled="
+                        list.report_status == 'approval' ||
+                        list.report_status == 'approved'
+                      "
+                      color="primary"
+                      elevation="0"
+                      outlined
+                      small
+                      @click="
+                        (createInspectionNote.dialog = true),
+                          (createInspectionNote.data = list)
+                      "
+                    >
+                      เพิ่มหมายเหตุ
+                    </v-btn>
+                  </div>
+                  <v-card
+                    v-if="list.inspection_note.length === 0"
+                    elevation="0"
+                    color="grey lighten-4 mt-4"
+                  >
+                    <v-card-text>
+                      <div class="cp-text-disable text-center">
+                        ไม่มีรายการหมายเหตุ
+                      </div>
+                    </v-card-text>
+                  </v-card>
+                  <v-expansion-panels v-else class="mt-4">
+                    <v-expansion-panel
+                      v-for="(item, i) in list.inspection_note"
+                      :key="i"
+                    >
+                      <v-expansion-panel-header v-slot="{ open }">
+                        <div v-if="!open">
+                          {{ item.edit_note_title }}
+                        </div>
+                        <div v-else class="cp-text-description">
+                          แก้ไขหมายเหตุ
+                        </div>
+                      </v-expansion-panel-header>
+                      <v-expansion-panel-content>
+                        <v-divider />
+                        <v-sheet class="d-flex align-center py-4" width="100%">
+                          <div>
+                            <v-btn
+                              :disabled="
+                                i + 1 === 1 ||
+                                list.report_status == 'approval' ||
+                                list.report_status == 'approved'
+                              "
+                              small
+                              elevation="0"
+                              color="#DBEEFE"
+                              @click="
+                                moveLocationItemList(
+                                  'up',
+                                  item.note_id,
+                                  item.inspection_id
+                                )
+                              "
+                            >
+                              <v-icon color="info">mdi-arrow-up-bold</v-icon>
+                            </v-btn>
+                          </div>
+                          <v-spacer />
+                          <div class="cp-subtitle text-center">
+                            ลำดับ :
+                            <b>{{ i + 1 }}</b>
+                          </div>
+                          <v-spacer />
+                          <div>
+                            <v-btn
+                              :disabled="
+                                i + 1 === list.inspection_note.length ||
+                                list.report_status == 'approval' ||
+                                list.report_status == 'approved'
+                              "
+                              small
+                              elevation="0"
+                              color="#DBEEFE"
+                              @click="
+                                moveLocationItemList(
+                                  'down',
+                                  item.note_id,
+                                  item.inspection_id
+                                )
+                              "
+                            >
+                              <v-icon color="info">mdi-arrow-down-bold</v-icon>
+                            </v-btn>
+                          </div>
+                        </v-sheet>
+                        <v-sheet width="100%">
+                          <v-text-field
+                            v-model="item.edit_note_title"
+                            :rules="item.titleRules"
+                            :append-icon="
+                              item.edit_note_title === item.note_title
+                                ? ''
+                                : 'mdi-sync'
+                            "
+                            :disabled="
+                              list.report_status == 'approval' ||
+                              list.report_status == 'approved'
+                            "
+                            counter="80"
+                            maxlength="80"
+                            outlined
+                            dense
+                            @click:append="
+                              item.edit_note_title = item.note_title
+                            "
+                          />
+                          <v-textarea
+                            v-model="item.edit_note_message"
+                            :append-icon="
+                              item.edit_note_message === item.note_message
+                                ? ''
+                                : 'mdi-sync'
+                            "
+                            :disabled="
+                              list.report_status == 'approval' ||
+                              list.report_status == 'approved'
+                            "
+                            placeholder="เพิ่มรายการหมายเหตุ"
+                            rows="5"
+                            outlined
+                            no-resize
+                            hide-details
+                            @click:append="
+                              item.edit_note_message = item.note_message
+                            "
+                          >
+                          </v-textarea>
+                          <div class="d-flex align-center pt-4">
+                            <v-btn
+                              :disabled="
+                                list.report_status == 'approval' ||
+                                list.report_status == 'approved'
+                              "
+                              color="error"
+                              text
+                              small
+                              @click="
+                                (deleteInspectionNote.dialog = true),
+                                  (deleteInspectionNote.data = item)
+                              "
+                            >
+                              ลบหมายเหตู
+                            </v-btn>
+                            <v-spacer />
+                            <v-btn
+                              :disabled="
+                                (item.edit_note_title === item.note_title &&
+                                  item.edit_note_message ===
+                                    item.note_message) ||
+                                item.edit_note_title.length === 0
+                              "
+                              color="primary"
+                              elevation="0"
+                              small
+                              @click="onUpdateInspectionNote(item)"
+                            >
+                              บันทึก
+                            </v-btn>
+                          </div>
+                        </v-sheet>
+                      </v-expansion-panel-content>
+                    </v-expansion-panel>
+                  </v-expansion-panels>
                 </div>
               </div>
             </cp-card>
@@ -273,7 +447,7 @@
                 <!-- หมายเหตุ: บอกทีมหน้างาน -->
                 <v-col cols="12">
                   <div class="cp-title pb-4">รายละเอียดโปรเจค</div>
-                  <div class="cp-text-description">หมายเหตุ</div>
+                  <div class="cp-text-description">หมายเหตุการทำงาน</div>
                   <div
                     v-if="!editProjectNote.focus"
                     class="box-edit-note"
@@ -661,7 +835,7 @@
 
       <v-col cols="12" sm="12" md="4" lg="4">
         <!-- ไฟล์ภาพของโปรเจค -->
-        <cp-card-max class="pa-6">
+        <cp-card-max class="pa-4">
           <div class="cp-subtitle pb-4">ไฟล์ภาพของโปรเจค</div>
           <v-row>
             <v-col cols="12">
@@ -690,15 +864,7 @@
                 </div>
               </div>
               <div v-else class="image-zone">
-                <v-img
-                  :src="projectFile.main.src"
-                  aspect-ratio="1.6"
-                  @click="(projectFile.dialog = true), (projectFile.show = 0)"
-                >
-                  <div class="cp-img">
-                    <v-icon color="white" large> mdi-arrow-expand-all </v-icon>
-                  </div>
-                </v-img>
+                <v-img :src="projectFile.main.src" aspect-ratio="1.6"> </v-img>
               </div>
               <div v-if="projectFile.main" class="pt-2 d-flex">
                 <v-spacer />
@@ -767,15 +933,7 @@
                 </div>
               </div>
               <div v-else class="image-zone">
-                <v-img
-                  :src="projectFile.plan1"
-                  aspect-ratio="1.6"
-                  contain
-                  @click="(projectFile.dialog = true), (projectFile.show = 1)"
-                >
-                  <div class="cp-img">
-                    <v-icon color="white"> mdi-arrow-expand-all </v-icon>
-                  </div>
+                <v-img :src="projectFile.plan1" aspect-ratio="1.6" contain>
                 </v-img>
               </div>
               <div v-if="projectFile.plan1" class="pt-2 d-flex justify-end">
@@ -853,15 +1011,7 @@
                 </div>
               </div>
               <div v-else class="image-zone">
-                <v-img
-                  :src="projectFile.plan2"
-                  aspect-ratio="1.6"
-                  contain
-                  @click="(projectFile.dialog = true), (projectFile.show = 2)"
-                >
-                  <div class="cp-img">
-                    <v-icon color="white"> mdi-arrow-expand-all </v-icon>
-                  </div>
+                <v-img :src="projectFile.plan2" aspect-ratio="1.6" contain>
                 </v-img>
               </div>
               <div v-if="projectFile.plan2" class="pt-2 d-flex justify-end">
@@ -939,15 +1089,7 @@
                 </div>
               </div>
               <div v-else class="image-zone">
-                <v-img
-                  :src="projectFile.plan3"
-                  aspect-ratio="1.6"
-                  contain
-                  @click="(projectFile.dialog = true), (projectFile.show = 3)"
-                >
-                  <div class="cp-img">
-                    <v-icon color="white"> mdi-arrow-expand-all </v-icon>
-                  </div>
+                <v-img :src="projectFile.plan3" aspect-ratio="1.6" contain>
                 </v-img>
               </div>
               <div v-if="projectFile.plan3" class="pt-2 d-flex justify-end">
@@ -1025,15 +1167,7 @@
                 </div>
               </div>
               <div v-else class="image-zone">
-                <v-img
-                  :src="projectFile.plan4"
-                  aspect-ratio="1.6"
-                  contain
-                  @click="(projectFile.dialog = true), (projectFile.show = 4)"
-                >
-                  <div class="cp-img">
-                    <v-icon color="white"> mdi-arrow-expand-all </v-icon>
-                  </div>
+                <v-img :src="projectFile.plan4" aspect-ratio="1.6" contain>
                 </v-img>
               </div>
               <div v-if="projectFile.plan4" class="pt-2 d-flex justify-end">
@@ -1087,7 +1221,24 @@
       <!-- ทีมงาน -->
       <v-col cols="12">
         <cp-card>
-          <div class="cp-title pa-4">หัวหน้าทีม</div>
+          <div class="d-flex align-center px-4 pt-4">
+            <div class="cp-title">หัวหน้าทีม</div>
+            <v-spacer />
+            <div v-if="projectTeams.supervisor.length != 0">
+              <v-btn
+                v-if="role != 'Checker'"
+                color="primary"
+                outlined
+                small
+                @click="
+                  (addTeams.dialog = true),
+                    (addTeams.teamSelectType = 'supervisor')
+                "
+              >
+                เปลี่ยน
+              </v-btn>
+            </div>
+          </div>
           <div
             v-if="projectTeams.supervisor.length === 0 && role == 'Checker'"
             class="cp-no-team-no-action"
@@ -1105,129 +1256,102 @@
             >
               <span>เพิ่มหัวหน้าทีม</span>
             </div>
-            <div v-else class="pa-4 d-flex align-center">
-              <v-avatar size="55" color="primary">
-                <v-img
-                  v-if="projectTeams.supervisor[0].avatar_path"
-                  :src="projectTeams.supervisor[0].avatar_path"
-                />
-                <v-img v-else :src="require('@/assets/images/no-avatar.png')" />
-              </v-avatar>
-
-              <div class="ml-4 cp-subtitle">
-                <div>
-                  <div>
+            <div v-else class="pa-4">
+              <v-row no-gutters>
+                <v-col cols="2">
+                  <v-avatar size="55" color="primary">
+                    <v-img
+                      v-if="projectTeams.supervisor[0].avatar_path"
+                      :src="projectTeams.supervisor[0].avatar_path"
+                    />
+                    <v-img
+                      v-else
+                      :src="require('@/assets/images/no-avatar.png')"
+                    />
+                  </v-avatar>
+                </v-col>
+                <v-col cols="10" class="mt-1 pl-4">
+                  <v-card class="cp-subtitle" flat>
                     <b>{{ projectTeams.supervisor[0].code_name }}</b>
+                  </v-card>
+                  <div class="green--text">
+                    <b>
+                      {{ mapRoleName(projectTeams.supervisor[0].member_role) }}
+                    </b>
                   </div>
-                  <div>
-                    {{
-                      projectTeams.supervisor[0].first_name +
-                      " " +
-                      projectTeams.supervisor[0].last_name
-                    }}
-                  </div>
-                </div>
-
-                <div class="green--text">
-                  <b>
-                    {{ mapRoleName(projectTeams.supervisor[0].member_role) }}
-                  </b>
-                </div>
-              </div>
-            </div>
-            <div v-if="projectTeams.supervisor.length != 0" class="d-flex px-4">
-              <v-spacer />
-              <v-btn
-                v-if="role != 'Checker'"
-                elevation="0"
-                height="36"
-                color="primary"
-                outlined
-                @click="
-                  (addTeams.dialog = true),
-                    (addTeams.teamSelectType = 'supervisor')
-                "
-              >
-                เปลี่ยน
-              </v-btn>
+                </v-col>
+              </v-row>
             </div>
           </div>
 
-          <v-divider class="mb-6 mt-4" />
+          <v-divider class="my-4" />
 
-          <v-data-table
-            :headers="projectTeams.headers"
-            :items="projectTeams.checker"
-            :loading="projectTeams.loading"
-            class="elevation-0 pb-4"
-            hide-default-footer
+          <v-toolbar class="mb-4" flat>
+            <v-toolbar-title>ทีมตรวจ</v-toolbar-title>
+            <v-spacer />
+            <v-btn
+              v-if="role != 'Checker'"
+              elevation="0"
+              height="36"
+              color="primary"
+              @click="
+                (addTeams.dialog = true), (addTeams.teamSelectType = 'checker')
+              "
+            >
+              <v-icon left>mdi-plus</v-icon>
+              เพิ่ม
+            </v-btn>
+          </v-toolbar>
+
+          <div
+            v-if="projectTeams.checker.length === 0"
+            class="cp-text-disable text-center pb-6"
           >
-            <template #top>
-              <v-toolbar flat class="mb-6">
-                <v-toolbar-title>ทีมตรวจ</v-toolbar-title>
-                <v-spacer />
-                <v-btn
-                  v-if="role != 'Checker'"
-                  elevation="0"
-                  height="36"
-                  color="primary"
-                  @click="
-                    (addTeams.dialog = true),
-                      (addTeams.teamSelectType = 'checker')
-                  "
-                >
-                  <div class="cp-text-capitalize">
-                    <v-icon left>mdi-plus</v-icon>
-                    เพิ่ม
+            ยังไม่มีทีมตรวจ
+          </div>
+
+          <v-card
+            v-for="(item, index) in projectTeams.checker"
+            :key="index"
+            flat
+          >
+            <v-card-text>
+              <v-row no-gutters>
+                <v-col cols="2">
+                  <v-avatar size="40" color="primary">
+                    <img v-if="item.avatar_path" :src="item.avatar_path" />
+                    <v-img
+                      v-else
+                      :src="require('@/assets/images/no-avatar.png')"
+                    />
+                  </v-avatar>
+                </v-col>
+                <v-col cols="7">
+                  <div class="cp-body">
+                    <b>{{ item.code_name }}</b>
                   </div>
-                </v-btn>
-              </v-toolbar>
-            </template>
-
-            <template #item.first_name="{ item }">
-              <div class="col-user">
-                <v-avatar size="40" color="primary">
-                  <img v-if="item.avatar_path" :src="item.avatar_path" />
-                  <v-img
-                    v-else
-                    :src="require('@/assets/images/no-avatar.png')"
-                  />
-                </v-avatar>
-                <div>
-                  <div class="cp-medium">
-                    {{ item.first_name + " " + item.last_name }}
+                  <div>
+                    <b class="success--text">
+                      {{ mapRoleName(item.member_role) }}
+                    </b>
                   </div>
-                </div>
-              </div>
-            </template>
-
-            <template #item.member_role="{ item }">
-              <div class="success--text">
-                {{ mapRoleName(item.member_role) }}
-              </div>
-            </template>
-
-            <template #item.actions="{ item }">
-              <cp-col min="100" class="mb-4">
-                <v-btn
-                  v-if="role != 'Checker'"
-                  height="36"
-                  outlined
-                  @click="
-                    (deleteTeamChecker.dialog = true),
-                      (deleteTeamChecker.data = item)
-                  "
-                >
-                  ลบ
-                </v-btn>
-                <v-icon v-else disabled small> mdi-delete-off-outline </v-icon>
-              </cp-col>
-            </template>
-
-            <template #no-data>
-              <div class="my-6">ไม่มีข้อมูลทีม Checker</div>
-            </template>
-          </v-data-table>
+                </v-col>
+                <v-col cols="3" class="text-right mt-2">
+                  <v-btn
+                    v-if="role != 'Checker'"
+                    small
+                    outlined
+                    @click="
+                      (deleteTeamChecker.dialog = true),
+                        (deleteTeamChecker.data = item)
+                    "
+                  >
+                    ลบ
+                  </v-btn>
+                </v-col>
+              </v-row>
+            </v-card-text>
+          </v-card>
         </cp-card>
       </v-col>
     </v-row>
@@ -1390,8 +1514,8 @@
           <div class="mb-4">รายการที่จะถูกลบมีดังนี้</div>
 
           <v-row no-gutters>
-            <v-col cols="4"> รายงาน </v-col>
-            <v-col cols="8">
+            <v-col cols="5"> รายงาน </v-col>
+            <v-col cols="7">
               <div v-if="deleteInspection.reportDeleteDone">
                 <b class="success--text">ถูกลบแล้ว</b>
               </div>
@@ -1420,8 +1544,8 @@
               </div>
             </v-col>
 
-            <v-col cols="4" class="mt-2"> Location </v-col>
-            <v-col cols="8" class="mt-2">
+            <v-col cols="5" class="mt-2"> Location </v-col>
+            <v-col cols="7" class="mt-2">
               <div v-if="deleteInspection.locationDeleteDone">
                 <b class="success--text">ถูกลบแล้ว</b>
               </div>
@@ -1455,8 +1579,8 @@
               </div>
             </v-col>
 
-            <v-col cols="4" class="mt-2"> System </v-col>
-            <v-col cols="8" class="mt-2">
+            <v-col cols="5" class="mt-2"> System </v-col>
+            <v-col cols="7" class="mt-2">
               <div v-if="deleteInspection.systemDeleteDone">
                 <b class="success--text">ถูกลบแล้ว</b>
               </div>
@@ -1490,8 +1614,8 @@
               </div>
             </v-col>
 
-            <v-col cols="4" class="mt-2"> Location Deflect </v-col>
-            <v-col cols="8" class="mt-2">
+            <v-col cols="5" class="mt-2"> Location Deflect </v-col>
+            <v-col cols="7" class="mt-2">
               <div v-if="deleteInspection.loading">
                 <v-progress-linear
                   v-model="deleteInspection.locationProgress"
@@ -1522,8 +1646,8 @@
               </div>
             </v-col>
 
-            <v-col cols="4" class="mt-2"> System Deflect </v-col>
-            <v-col cols="8" class="mt-2">
+            <v-col cols="5" class="mt-2"> System Deflect </v-col>
+            <v-col cols="7" class="mt-2">
               <div v-if="deleteInspection.loading">
                 <v-progress-linear
                   v-model="deleteInspection.systemProgress"
@@ -1622,9 +1746,6 @@
               <div class="cp-subtitle truncate">
                 {{ item.code_name }}
               </div>
-              <div class="truncate">
-                {{ item.first_name + " " + item.last_name }}
-              </div>
               <div class="success--text cp-semibold">
                 {{ mapRoleName(item.member_role) }}
               </div>
@@ -1686,6 +1807,99 @@
         </v-card-text>
       </v-card>
     </v-dialog>
+
+    <!-- Create Inspection Note -->
+    <v-dialog
+      v-model="createInspectionNote.dialog"
+      :persistent="createInspectionNote.loading"
+      width="400"
+      transition="dialog-transition"
+      content-class="elevation-0"
+      scrollable
+    >
+      <v-card>
+        <v-card-title>
+          สร้างหมายเหตุ
+          <v-spacer />
+          <v-btn
+            :disabled="createInspectionNote.loading"
+            icon
+            class="mt-n4 mr-n4"
+            @click="createInspectionNote.dialog = false"
+          >
+            <v-icon>mdi-close</v-icon>
+          </v-btn>
+        </v-card-title>
+        <v-card-text>
+          <v-form
+            ref="formCreateNote"
+            v-model="createInspectionNote.valid"
+            lazy-validation
+          >
+            <cp-label>หัวข้อหมายเหตุ</cp-label>
+            <v-text-field
+              v-model="createInspectionNote.title"
+              :rules="createInspectionNote.titleRules"
+              outlined
+              dense
+            />
+          </v-form>
+        </v-card-text>
+        <v-card-actions class="pb-4">
+          <v-spacer />
+          <v-btn
+            :loading="createInspectionNote.loading"
+            :disabled="!createInspectionNote.valid"
+            elevation="0"
+            height="36"
+            color="primary"
+            class="px-4"
+            @click="onCreateInspectionNote()"
+          >
+            สร้าง
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <!-- Delete Inspection Note -->
+    <v-dialog
+      v-model="deleteInspectionNote.dialog"
+      :persistent="deleteInspectionNote.loading"
+      max-width="400px"
+      transition="dialog-transition"
+      content-class="elevation-0"
+      scrollable
+    >
+      <v-card>
+        <v-card-title>
+          ลบ หมายเหตุ
+          <v-spacer />
+          <v-btn
+            :disabled="deleteInspectionNote.loading"
+            icon
+            class="mt-n4 mr-n4"
+            @click="deleteInspectionNote.dialog = false"
+          >
+            <v-icon>mdi-close</v-icon>
+          </v-btn>
+        </v-card-title>
+        <v-card-text>
+          คุณแน่ใจหรือไม่ที่คุณจะลบหมายเหตุนี้ออกจากรายการตรวจ?
+          <div class="mt-6 d-flex flex-row-reverse">
+            <v-btn
+              :loading="deleteInspectionNote.loading"
+              elevation="0"
+              height="36"
+              color="error"
+              @click="onDeleteInspectionNote()"
+            >
+              <div class="cp-text-capitalize">ยืนยัน</div>
+            </v-btn>
+          </div>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
@@ -1728,17 +1942,10 @@ export default {
         loading: false,
         headers: [
           {
-            text: "ทีมงาน",
+            text: "Code Name",
             sortable: false,
-            value: "first_name",
-          },
-          { text: "Code Name", value: "code_name", sortable: false },
-          { text: "บทบาท", value: "member_role", sortable: false },
-          {
-            text: "การดำเนินการ",
-            align: "center",
-            value: "actions",
-            sortable: false,
+            value: "code_name",
+            align: "start",
           },
         ],
         supervisor: [],
@@ -1885,6 +2092,22 @@ export default {
         locationDeleteDone: false,
         systemDeleteDone: false,
       },
+      createInspectionNote: {
+        dialog: false,
+        loading: false,
+        valid: false,
+        title: "",
+        titleRules: [
+          (v) => !!v || "ขอมูลจำเป็น",
+          (v) => /^(?!\s)/.test(v) || "ห้ามมีช่องว่างด้านหน้า",
+        ],
+        data: null,
+      },
+      deleteInspectionNote: {
+        dialog: false,
+        loading: false,
+        data: null,
+      },
     };
   },
 
@@ -1893,15 +2116,7 @@ export default {
   },
 
   computed: {
-    ...mapState("user", [
-      "accountId",
-      "avatarPath",
-      "firstName",
-      "lastName",
-      "codeName",
-      "role",
-      "appRoleList",
-    ]),
+    ...mapState("user", ["role", "appRoleList"]),
 
     formattedWorkingDate() {
       if (this.projectInspection.workingDate) {
@@ -2037,6 +2252,12 @@ export default {
         this.onBeforeDeleteInspection();
       }
     },
+    "createInspectionNote.dialog"(newValue) {
+      if (!newValue) {
+        this.$refs.formCreateNote.reset();
+        this.createInspectionNote.data = null;
+      }
+    },
   },
 
   created() {
@@ -2069,7 +2290,9 @@ export default {
     },
 
     mapRoleName(level) {
-      const role = this.appRoleList.find((role) => role.role_level === level);
+      const role = this.appRoleList.find(
+        (role) => Number(role.role_level) === Number(level)
+      );
       return role ? role.role_name : null;
     },
 
@@ -2902,6 +3125,26 @@ export default {
           .then(({ data }) => {
             if (data.data) {
               data.data.sort((a, b) => a.id - b.id);
+              data.data.forEach((inspection) => {
+                inspection.inspection_note.forEach((note) => {
+                  note.titleRules = [(v) => !!v || "ขอมูลจำเป็น"];
+                  note.edit_note_title = note.note_title;
+                  if (note.note_message) {
+                    const newlineContent = note.note_message.replace(
+                      /<br \/>/g,
+                      ""
+                    );
+                    note.note_message = newlineContent;
+                    note.edit_note_message = newlineContent;
+                  } else {
+                    note.note_message = "";
+                    note.edit_note_message = "";
+                  }
+                });
+                inspection.inspection_note.sort(
+                  (a, b) => a.item_number - b.item_number
+                );
+              });
               this.projectInspection.inspectionList = data.data;
             }
           })
@@ -3519,6 +3762,144 @@ export default {
         this.handleUploadError(response.data);
       }
     },
+
+    async onCreateInspectionNote() {
+      if (this.$refs.formCreateNote.validate()) {
+        const accessToken = await this.getAccessToken();
+        if (accessToken) {
+          this.createInspectionNote.loading = true;
+          this.$axios
+            .post(
+              `${process.env.API_ENDPOINT}/v1/project/inspection/create-note`,
+              {
+                project_id: this.$route.query.id,
+                inspection_id: this.createInspectionNote.data.inspection_id,
+                note_title: this.createInspectionNote.title.trim(),
+              },
+              {
+                headers: {
+                  Authorization: `Bearer ${accessToken}`,
+                },
+              }
+            )
+            .then(({ data }) => {
+              this.createInspectionNote.loading = false;
+              this.createInspectionNote.dialog = false;
+              this.getInspectionList();
+            })
+            .catch(({ response }) => {
+              this.createInspectionNote.loading = false;
+              this.onNotify({
+                notifyValue: true,
+                type: "error",
+                title: "เกิดข้อผิดพลาด",
+                message: "รายการตรวจนี้ถูกลบไปแล้วกรุณาโหลดข้อมูลใหม่",
+              });
+            });
+        }
+      }
+    },
+
+    async onDeleteInspectionNote() {
+      const accessToken = await this.getAccessToken();
+      if (accessToken) {
+        this.deleteInspectionNote.loading = true;
+        this.$axios
+          .post(
+            `${process.env.API_ENDPOINT}/v1/project/inspection/delete-note`,
+            {
+              project_id: this.$route.query.id,
+              inspection_id: this.deleteInspectionNote.data.inspection_id,
+              note_id: this.deleteInspectionNote.data.note_id,
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+              },
+            }
+          )
+          .then(({ data }) => {
+            this.deleteInspectionNote.loading = false;
+            this.deleteInspectionNote.dialog = false;
+            this.getInspectionList();
+          })
+          .catch(({ response }) => {
+            this.deleteInspectionNote.loading = false;
+            this.onNotify({
+              notifyValue: true,
+              type: "error",
+              title: "เกิดข้อผิดพลาด",
+              message: "หมายเหตุนี้ถูกลบไปแล้วกรุณาโหลดข้อมูลใหม่",
+            });
+          });
+      }
+    },
+
+    async onUpdateInspectionNote(item) {
+      const accessToken = await this.getAccessToken();
+      if (accessToken) {
+        const formattedMessage = item.edit_note_message.replace(/\n/g, "\n");
+        this.$axios
+          .post(
+            `${process.env.API_ENDPOINT}/v1/project/inspection/update-note`,
+            {
+              project_id: this.$route.query.id,
+              inspection_id: item.inspection_id,
+              note_id: item.note_id,
+              note_title: item.edit_note_title.trim(),
+              note_message: formattedMessage,
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+              },
+            }
+          )
+          .then(({ data }) => {
+            this.getInspectionList();
+          })
+          .catch(({ response }) => {
+            this.onNotify({
+              notifyValue: true,
+              type: "error",
+              title: "เกิดข้อผิดพลาด",
+              message: "หมายเหตุนี้ถูกลบไปแล้วกรุณาโหลดข้อมูลใหม่",
+            });
+          });
+      }
+    },
+
+    async moveLocationItemList(action, noteId, inspectionId) {
+      const accessToken = await this.getAccessToken();
+      if (accessToken) {
+        this.$axios
+          .post(
+            `${process.env.API_ENDPOINT}/v1/project/inspection/move-note`,
+            {
+              project_id: this.$route.query.id,
+              inspection_id: inspectionId,
+              type_action: action,
+              note_id: noteId,
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+              },
+            }
+          )
+          .then(({ data }) => {
+            this.getInspectionList();
+          })
+          .catch(({ response }) => {
+            this.onNotify({
+              notifyValue: true,
+              type: "error",
+              title: "ดำเนินการไม่สำเร็จ",
+              message: response,
+            });
+          });
+      }
+    },
   },
 };
 </script>
@@ -3688,9 +4069,8 @@ export default {
   overflow: hidden;
   padding: 16px;
   border-radius: 4px;
-  margin-bottom: 24px;
   gap: 16px;
-  border: 1px solid var(--gray-300);
+  border-top: 1px solid var(--gray-300);
   transition: all ease 0.3s;
 }
 .cp-inspection-card-no {

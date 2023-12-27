@@ -137,7 +137,7 @@
         </template>
 
         <template #no-data>
-          <div class="my-6">ไม่มีข้อมูล</div>
+          <div class="my-6 px-4">ไม่มีข้อมูลรายงาน</div>
         </template>
       </v-data-table>
     </cp-card>

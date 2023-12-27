@@ -124,6 +124,11 @@
                     :src="list.project_image"
                     aspect-ratio="1.4"
                     class="cp-image-card"
+                    @click="
+                      $router.push(
+                        `/projects/list/detail?id=${list.project_id}`
+                      )
+                    "
                   >
                     <template #placeholder>
                       <v-row

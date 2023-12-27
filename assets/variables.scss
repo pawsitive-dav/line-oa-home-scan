@@ -2,3 +2,27 @@
 //
 // The variables you want to modify
 // $font-size-root: 20px;
+
+@media only screen and (max-width: 600px) {
+    .v-application--is-ltr .v-data-table__mobile-row__cell {
+        flex: 1;
+        width: 1px;
+    }
+
+    .v-data-table>.v-data-table__wrapper>table>tbody>tr>td,
+    .v-data-table>.v-data-table__wrapper>table>tbody>tr>th,
+    .v-data-table>.v-data-table__wrapper>table>thead>tr>td,
+    .v-data-table>.v-data-table__wrapper>table>thead>tr>th,
+    .v-data-table>.v-data-table__wrapper>table>tfoot>tr>td,
+    .v-data-table>.v-data-table__wrapper>table>tfoot>tr>th {
+        padding: 0;
+    }
+
+    .v-application--is-ltr .v-expansion-panel-header {
+        padding: 0 16px;
+    }
+
+    .v-expansion-panel-content__wrap {
+        padding: 0px 16px 16px 16px;
+    }
+}

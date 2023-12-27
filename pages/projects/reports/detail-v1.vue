@@ -1,4 +1,3 @@
-<!-- eslint-disable vue/valid-v-slot -->
 <template>
   <div v-if="!reportDetail">
     <!-- Page Loading -->
@@ -220,110 +219,104 @@
       </div>
 
       <!-- Project Detail -->
-      <v-row>
-        <v-col cols="12" sm="6">
-          <v-card flat class="cp-body">
-            <div class="detail-title">ข้อมูล โปรเจค</div>
-            <v-row no-gutters class="my-3">
-              <v-col cols="4"> ชื่อโปรเจค </v-col>
-              <v-col cols="8">
-                {{ reportDetail.project_detail.project_name }}
-              </v-col>
-            </v-row>
-            <v-row no-gutters class="my-3">
-              <v-col cols="4"> ตรวจรอบที่ </v-col>
-              <v-col cols="8">
-                {{ reportDetail.project_detail.inspection_no }}
-              </v-col>
-            </v-row>
-            <v-row no-gutters class="my-3">
-              <v-col cols="4"> วันที่เข้าตรวจ </v-col>
-              <v-col cols="8">
-                {{ formatDate(reportDetail.project_detail.working_date) }}
-              </v-col>
-            </v-row>
+      <div class="mt-4">
+        <div class="detail-title mb-2">ข้อมูล โปรเจค</div>
+        <div class="detail-label">
+          <div class="detail-key">ชื่อโปรเจค</div>
+          <div class="detail-value">
+            {{ reportDetail.project_detail.project_name }}
+          </div>
+        </div>
+        <div class="detail-label">
+          <div class="detail-key">ตรวจรอบที่</div>
+          <div class="detail-value">
+            {{ reportDetail.project_detail.inspection_no }}
+          </div>
+        </div>
+        <div class="detail-label">
+          <div class="detail-key">วันที่เข้าตรวจ</div>
+          <div class="detail-value">
+            {{ formatDate(reportDetail.project_detail.working_date) }}
+          </div>
+        </div>
+      </div>
+      <div class="mt-4">
+        <div class="detail-title mb-2">ข้อมูล ลูกค้า</div>
+        <div class="detail-label">
+          <div class="detail-key">ชื่อ</div>
+          <div class="detail-value">
+            {{ reportDetail.customer_detail.name }}
+          </div>
+        </div>
+        <div class="detail-label">
+          <div class="detail-key">เบอร์โทร</div>
+          <div class="detail-value">
+            {{
+              reportDetail.customer_detail.phone
+                ? formatPhoneNumber(reportDetail.customer_detail.phone)
+                : "-"
+            }}
+          </div>
+        </div>
+        <div class="detail-label">
+          <div class="detail-key">อีเมล</div>
+          <div class="detail-value">
+            {{ reportDetail.customer_detail.email || "-" }}
+          </div>
+        </div>
+      </div>
 
-            <div class="detail-title" style="margin-top: 50px">
-              ข้อมูล {{ reportDetail.type_detail.project_type }}
-            </div>
-            <v-row no-gutters class="my-3">
-              <v-col cols="4"> ประเภท </v-col>
-              <v-col cols="8">
-                {{ reportDetail.type_detail.project_type }}
-              </v-col>
-            </v-row>
-            <v-row no-gutters class="my-3">
-              <v-col cols="4"> เลขที่ </v-col>
-              <v-col cols="8">
-                {{ reportDetail.type_detail.type_address || "-" }}
-              </v-col>
-            </v-row>
-            <v-row no-gutters class="my-3">
-              <v-col cols="4"> พื้นที่ใช้สอย </v-col>
-              <v-col cols="8">
-                <span v-if="reportDetail.type_detail.type_usable_area">
-                  {{ reportDetail.type_detail.type_usable_area }} ตร.ม.
-                </span>
-                <span v-else>-</span>
-              </v-col>
-            </v-row>
-          </v-card>
-        </v-col>
-        <v-col cols="1"></v-col>
-        <v-col cols="12" sm="5">
-          <v-card flat class="cp-body">
-            <div class="detail-title">ข้อมูล ลูกค้า</div>
-            <v-row no-gutters class="my-3">
-              <v-col cols="4"> ชื่อ </v-col>
-              <v-col cols="8">
-                {{ reportDetail.customer_detail.name }}
-              </v-col>
-            </v-row>
-            <v-row no-gutters class="my-3">
-              <v-col cols="4"> เบอร์โทร </v-col>
-              <v-col cols="8">
-                {{
-                  reportDetail.customer_detail.phone
-                    ? formatPhoneNumber(reportDetail.customer_detail.phone)
-                    : "-"
-                }}
-              </v-col>
-            </v-row>
-            <v-row no-gutters class="my-3">
-              <v-col cols="4"> อีเมล </v-col>
-              <v-col cols="8">
-                {{ reportDetail.customer_detail.email || "-" }}
-              </v-col>
-            </v-row>
-
-            <div class="detail-title" style="margin-top: 50px">
-              ข้อมูล เจ้าหน้าที่โครงการ
-            </div>
-            <v-row no-gutters class="my-3">
-              <v-col cols="4"> ชื่อ </v-col>
-              <v-col cols="8">
-                {{ reportDetail.coordinator_detail.name || "-" }}
-              </v-col>
-            </v-row>
-            <v-row no-gutters class="my-3">
-              <v-col cols="4"> เบอร์โทร </v-col>
-              <v-col cols="8">
-                {{
-                  reportDetail.coordinator_detail.phone
-                    ? formatPhoneNumber(reportDetail.coordinator_detail.phone)
-                    : "-"
-                }}
-              </v-col>
-            </v-row>
-            <v-row no-gutters class="my-3">
-              <v-col cols="4"> อีเมล </v-col>
-              <v-col cols="8">
-                {{ reportDetail.coordinator_detail.email || "-" }}
-              </v-col>
-            </v-row>
-          </v-card>
-        </v-col>
-      </v-row>
+      <div class="mt-4">
+        <div class="detail-title mb-2">
+          ข้อมูล {{ reportDetail.type_detail.project_type }}
+        </div>
+        <div class="detail-label">
+          <div class="detail-key">ประเภท</div>
+          <div class="detail-value">
+            {{ reportDetail.type_detail.project_type }}
+          </div>
+        </div>
+        <div class="detail-label">
+          <div class="detail-key">เลขที่</div>
+          <div class="detail-value">
+            {{ reportDetail.type_detail.type_address || "-" }}
+          </div>
+        </div>
+        <div class="detail-label">
+          <div class="detail-key">พื้นที่ใช้สอย</div>
+          <div class="detail-value">
+            <span v-if="reportDetail.type_detail.type_usable_area">
+              {{ reportDetail.type_detail.type_usable_area }} ตร.ม.
+            </span>
+            <span v-else>-</span>
+          </div>
+        </div>
+      </div>
+      <div class="mt-4">
+        <div class="detail-title mb-2">ข้อมูล เจ้าหน้าที่โครงการ</div>
+        <div class="detail-label">
+          <div class="detail-key">ชื่อ</div>
+          <div class="detail-value">
+            {{ reportDetail.coordinator_detail.name }}
+          </div>
+        </div>
+        <div class="detail-label">
+          <div class="detail-key">เบอร์โทร</div>
+          <div class="detail-value">
+            {{
+              reportDetail.coordinator_detail.phone
+                ? formatPhoneNumber(reportDetail.coordinator_detail.phone)
+                : "-"
+            }}
+          </div>
+        </div>
+        <div class="detail-label">
+          <div class="detail-key">อีเมล</div>
+          <div class="detail-value">
+            {{ reportDetail.coordinator_detail.email || "-" }}
+          </div>
+        </div>
+      </div>
     </cp-card>
 
     <!-- Page Plan -->
@@ -355,6 +348,29 @@
       <div class="detail-title mb-6">
         <span class="error--text">หมายเหตุ</span>
       </div>
+
+      <div
+        v-for="(list, index) in noteGroupList"
+        :key="index + 'noteGroup'"
+        class="added-report-note"
+      >
+        <div v-if="!list.edit">
+          <div class="note-title">{{ list.report_title }}</div>
+          <v-row no-gutters>
+            <v-col
+              v-for="(item, i) in list.note_list"
+              :key="i + 'note_list'"
+              cols="12"
+            >
+              <div class="note-item-list">
+                <ul>
+                  <li>{{ item.list_message }}</li>
+                </ul>
+              </div>
+            </v-col>
+          </v-row>
+        </div>
+      </div>
     </cp-card>
 
     <!-- Page Location -->
@@ -363,100 +379,150 @@
         Location ยังไม่มี Deflect
       </div>
       <div v-for="(list, index) in locationList" :key="index + 'locationList'">
-        <div class="detail-title mb-2 mt-6">
+        <div class="detail-title mb-6">
           <span class="cp-text-primary">
             Location: {{ list.location_name }}
           </span>
         </div>
-        <v-pagination
-          v-model="list.page"
-          :length="list.pageCount"
-          color="success"
-        />
-        <v-data-table
-          :headers="headers"
-          :items="list.deflect_list"
-          :footer-props="{ 'items-per-page-options': [5, 10] }"
-          :items-per-page="5"
-          :page.sync="list.page"
-          hide-default-header
-          hide-default-footer
-          class="elevation-0"
-          @page-count="list.pageCount = $event"
-        >
-          <template #item.image_path="{ item }">
-            <v-img
-              :src="item.image_path"
-              aspect-ratio="1.4"
-              class="my-4 grey lighten-2"
-              min-width="150"
-              contain
-            ></v-img>
-          </template>
-
-          <template #item.deflect_status="{ item }">
-            <v-card
-              min-width="200"
-              color="transparent"
-              class="d-flex rounded-0"
-              flat
+        <div class="deflect-container">
+          <v-row>
+            <v-col
+              v-for="(deflectItem, indexDeflect) in list.deflect_list"
+              :key="indexDeflect + 'List'"
+              cols="12"
+              lg="6"
+              md="6"
+              sm="12"
             >
-              <v-sheet
-                :color="
-                  item.deflect_status === 0 || item.deflect_status === null
-                    ? 'grey lighten-2'
-                    : 'success'
-                "
-                width="50%"
-                height="48"
-                class="d-flex align-center justify-center"
-              >
-                <div
-                  v-if="
-                    item.deflect_status === 0 || item.deflect_status === null
-                  "
-                  class="cp-body"
-                >
-                  ผ่าน
-                </div>
-                <div v-else class="cp-body white--text">ผ่าน</div>
-              </v-sheet>
+              <div v-if="!deflectItem.image_path" class="deflect-card-no">
+                ไม่มี Deflect
+              </div>
+              <div v-else class="deflect-card">
+                <v-sheet width="100%" class="grey lighten-2 mb-4">
+                  <v-img
+                    :src="deflectItem.image_path"
+                    aspect-ratio="1.4"
+                    contain
+                  >
+                  </v-img>
+                </v-sheet>
 
-              <v-sheet
-                :color="
-                  item.deflect_status === 1 || item.deflect_status === null
-                    ? 'grey lighten-2'
-                    : 'error'
-                "
-                width="50%"
-                height="48"
-                class="d-flex align-center justify-center"
-              >
                 <div
-                  v-if="
-                    item.deflect_status === 1 || item.deflect_status === null
-                  "
-                  class="cp-body"
+                  v-if="deflectItem.deflect_status == null"
+                  class="box-status-wait"
                 >
-                  ไม่ผ่าน
+                  <v-icon class="wait-icon">mdi-home-search-outline</v-icon>
+                  รอตรวจสอบสถานะ
                 </div>
-                <div v-else class="cp-body white--text">ไม่ผ่าน</div>
-              </v-sheet>
-            </v-card>
-          </template>
+                <div v-else>
+                  <div
+                    v-if="deflectItem.deflect_status == 1"
+                    class="box-status-only"
+                  >
+                    <div class="status-pass">
+                      <v-icon color="success"> mdi-checkbox-outline </v-icon>
+                      <span class="success--text"> ผ่าน </span>
+                    </div>
+                    <div class="status">
+                      <v-icon color="grey"> mdi-checkbox-blank-outline </v-icon>
+                      <span class="grey--text"> ไม่ผ่าน </span>
+                    </div>
+                  </div>
+                  <div
+                    v-if="deflectItem.deflect_status == 0"
+                    class="box-status-only"
+                  >
+                    <div class="status">
+                      <v-icon color="grey"> mdi-checkbox-blank-outline </v-icon>
+                      <span class="grey--text"> ผ่าน </span>
+                    </div>
+                    <div class="status-not-pass">
+                      <v-icon color="error"> mdi-close-box-outline </v-icon>
+                      <span class="error--text"> ไม่ผ่าน </span>
+                    </div>
+                  </div>
+                </div>
 
-          <template #item.deflect_detail="{ item }">
-            <v-card
-              width="100%"
-              color="transparent"
-              class="text-left py-4"
-              flat
-            >
-              <p v-if="item.deflect_detail">{{ item.deflect_detail }}</p>
-              <p v-else class="cp-text-disable">ไม่มีรายละเอียด</p>
-            </v-card>
-          </template>
-        </v-data-table>
+                <v-row no-gutters>
+                  <v-col cols="12">
+                    <div class="cp-semibold">รายละเอียด:</div>
+                  </v-col>
+                  <v-col cols="12">
+                    <v-card flat>
+                      {{ deflectItem.deflect_detail || "-" }}
+                    </v-card>
+                  </v-col>
+                </v-row>
+
+                <v-divider class="my-4" />
+
+                <div>
+                  <cp-label>สร้าง Deflect โดย</cp-label>
+                  <div class="d-flex align-center">
+                    <v-avatar size="40" color="primary">
+                      <img
+                        v-if="deflectItem.created_by.avatar_path"
+                        :src="deflectItem.created_by.avatar_path"
+                      />
+                      <v-img
+                        v-else
+                        :src="require('@/assets/images/no-avatar.png')"
+                      />
+                    </v-avatar>
+                    <div class="ml-4">
+                      <div class="cp-semibold">
+                        ({{ deflectItem.created_by.code_name }})
+                        {{
+                          deflectItem.created_by.first_name +
+                          " " +
+                          deflectItem.created_by.last_name
+                        }}
+                      </div>
+                      <div>
+                        <v-icon small>mdi-calendar-clock-outline</v-icon>
+                        <span class="cp-text-description">{{
+                          formatDateMax(deflectItem.created_at)
+                        }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div v-if="deflectItem.deflect_status != null">
+                  <v-divider class="my-4" />
+                  <cp-label>บันทึกสถานะโดย</cp-label>
+                  <div class="d-flex align-center">
+                    <v-avatar size="40" color="primary">
+                      <img
+                        v-if="deflectItem.update_status_by.avatar_path"
+                        :src="deflectItem.update_status_by.avatar_path"
+                      />
+                      <v-img
+                        v-else
+                        :src="require('@/assets/images/no-avatar.png')"
+                      />
+                    </v-avatar>
+                    <div class="ml-4">
+                      <div class="cp-semibold">
+                        ({{ deflectItem.update_status_by.code_name }})
+                        {{
+                          deflectItem.update_status_by.first_name +
+                          " " +
+                          deflectItem.update_status_by.last_name
+                        }}
+                      </div>
+                      <div>
+                        <v-icon small>mdi-calendar-clock-outline</v-icon>
+                        <span class="cp-text-description">{{
+                          formatDateMax(deflectItem.update_status_at)
+                        }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </v-col>
+          </v-row>
+        </div>
       </div>
     </cp-card>
 
@@ -465,103 +531,226 @@
       <div v-if="systemList.length == 0" class="no-deflect">
         System ยังไม่มี Deflect
       </div>
-      <div v-for="(list, index) in systemList" :key="index + 'locationList'">
-        <div class="detail-title mb-2 mt-6">
+      <div v-for="(list, index) in systemList" :key="index + 'systemList'">
+        <div class="detail-title mb-6">
           <span class="cp-text-primary"> System: {{ list.system_name }} </span>
         </div>
-        <v-pagination
-          v-model="list.page"
-          :length="list.pageCount"
-          color="success"
-        />
-        <v-data-table
-          :headers="headers"
-          :items="list.deflect_list"
-          :footer-props="{ 'items-per-page-options': [5, 10] }"
-          :items-per-page="5"
-          :page.sync="list.page"
-          hide-default-header
-          hide-default-footer
-          class="elevation-0"
-          @page-count="list.pageCount = $event"
-        >
-          <template #item.image_path="{ item }">
-            <v-img
-              :src="item.image_path"
-              aspect-ratio="1.4"
-              class="my-4 grey lighten-2"
-              min-width="150"
-              contain
-            ></v-img>
-          </template>
-
-          <template #item.deflect_status="{ item }">
-            <v-card
-              min-width="200"
-              color="transparent"
-              class="d-flex rounded-0"
-              flat
+        <div class="deflect-container">
+          <v-row>
+            <v-col
+              v-for="(deflectItem, indexDeflect) in list.deflect_list"
+              :key="indexDeflect + 'List'"
+              cols="12"
+              lg="6"
+              md="6"
+              sm="12"
             >
-              <v-sheet
-                :color="
-                  item.deflect_status === 0 || item.deflect_status === null
-                    ? 'grey lighten-2'
-                    : 'success'
-                "
-                width="50%"
-                height="48"
-                class="d-flex align-center justify-center"
-              >
+              <div v-if="!deflectItem.image_path" class="deflect-card-no">
+                ไม่มี Deflect
+              </div>
+              <div v-else class="deflect-card">
+                <v-sheet width="100%" class="grey lighten-2 mb-4">
+                  <v-img :src="deflectItem.image_path" aspect-ratio="1.4">
+                  </v-img>
+                </v-sheet>
                 <div
-                  v-if="
-                    item.deflect_status === 0 || item.deflect_status === null
-                  "
-                  class="cp-body"
+                  v-if="deflectItem.deflect_status == null"
+                  class="box-status-wait"
                 >
-                  ผ่าน
+                  <v-icon class="wait-icon">mdi-home-search-outline</v-icon>
+                  รอตรวจสอบสถานะ
                 </div>
-                <div v-else class="cp-body white--text">ผ่าน</div>
-              </v-sheet>
-
-              <v-sheet
-                :color="
-                  item.deflect_status === 1 || item.deflect_status === null
-                    ? 'grey lighten-2'
-                    : 'error'
-                "
-                width="50%"
-                height="48"
-                class="d-flex align-center justify-center"
-              >
-                <div
-                  v-if="
-                    item.deflect_status === 1 || item.deflect_status === null
-                  "
-                  class="cp-body"
-                >
-                  ไม่ผ่าน
+                <div v-else>
+                  <div
+                    v-if="deflectItem.deflect_status == 1"
+                    class="box-status-only"
+                  >
+                    <div class="status-pass">
+                      <v-icon color="success"> mdi-checkbox-outline </v-icon>
+                      <span class="success--text"> ผ่าน </span>
+                    </div>
+                    <div class="status">
+                      <v-icon color="grey"> mdi-checkbox-blank-outline </v-icon>
+                      <span class="grey--text"> ไม่ผ่าน </span>
+                    </div>
+                  </div>
+                  <div
+                    v-if="deflectItem.deflect_status == 0"
+                    class="box-status-only"
+                  >
+                    <div class="status">
+                      <v-icon color="grey"> mdi-checkbox-blank-outline </v-icon>
+                      <span class="grey--text"> ผ่าน </span>
+                    </div>
+                    <div class="status-not-pass">
+                      <v-icon color="error"> mdi-close-box-outline </v-icon>
+                      <span class="error--text"> ไม่ผ่าน </span>
+                    </div>
+                  </div>
                 </div>
-                <div v-else class="cp-body white--text">ไม่ผ่าน</div>
-              </v-sheet>
-            </v-card>
-          </template>
 
-          <template #item.deflect_detail="{ item }">
-            <v-card
-              width="100%"
-              color="transparent"
-              class="text-left py-4"
-              flat
-            >
-              <p v-if="item.deflect_detail">{{ item.deflect_detail }}</p>
-              <p v-else class="cp-text-disable">ไม่มีรายละเอียด</p>
-            </v-card>
-          </template>
-        </v-data-table>
+                <v-row no-gutters>
+                  <v-col cols="12">
+                    <div class="cp-semibold">รายละเอียด:</div>
+                  </v-col>
+                  <v-col cols="12">
+                    <v-card flat>
+                      {{ deflectItem.deflect_detail || "-" }}
+                    </v-card>
+                  </v-col>
+                </v-row>
+
+                <v-divider class="my-4" />
+
+                <div>
+                  <cp-label>สร้าง Deflect โดย</cp-label>
+                  <div class="d-flex align-center">
+                    <v-avatar size="40" color="primary">
+                      <img
+                        v-if="deflectItem.created_by.avatar_path"
+                        :src="deflectItem.created_by.avatar_path"
+                      />
+                      <v-img
+                        v-else
+                        :src="require('@/assets/images/no-avatar.png')"
+                      />
+                    </v-avatar>
+                    <div class="ml-4">
+                      <div class="cp-semibold">
+                        ({{ deflectItem.created_by.code_name }})
+                        {{
+                          deflectItem.created_by.first_name +
+                          " " +
+                          deflectItem.created_by.last_name
+                        }}
+                      </div>
+                      <div>
+                        <v-icon small>mdi-calendar-clock-outline</v-icon>
+                        <span class="cp-text-description">{{
+                          formatDateMax(deflectItem.created_at)
+                        }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div v-if="deflectItem.deflect_status != null">
+                  <v-divider class="my-4" />
+                  <cp-label>บันทึกสถานะโดย</cp-label>
+                  <div class="d-flex align-center">
+                    <v-avatar size="40" color="primary">
+                      <img
+                        v-if="deflectItem.update_status_by.avatar_path"
+                        :src="deflectItem.update_status_by.avatar_path"
+                      />
+                      <v-img
+                        v-else
+                        :src="require('@/assets/images/no-avatar.png')"
+                      />
+                    </v-avatar>
+                    <div class="ml-4">
+                      <div class="cp-semibold">
+                        ({{ deflectItem.update_status_by.code_name }})
+                        {{
+                          deflectItem.update_status_by.first_name +
+                          " " +
+                          deflectItem.update_status_by.last_name
+                        }}
+                      </div>
+                      <div>
+                        <v-icon small>mdi-calendar-clock-outline</v-icon>
+                        <span class="cp-text-description">{{
+                          formatDateMax(deflectItem.update_status_at)
+                        }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </v-col>
+          </v-row>
+        </div>
       </div>
     </cp-card>
 
     <!-- Modal -->
+    <!-- Delete Note -->
+    <v-dialog
+      v-model="deleteNoteGroup.dialog"
+      :persistent="deleteNoteGroup.loading"
+      max-width="400px"
+      transition="dialog-transition"
+      content-class="elevation-0"
+      scrollable
+    >
+      <v-card>
+        <v-card-title>
+          ลบหมายเหตุ
+          <v-spacer />
+          <v-btn
+            :disabled="deleteNoteGroup.loading"
+            icon
+            class="mt-n4 mr-n4"
+            @click="deleteNoteGroup.dialog = false"
+          >
+            <v-icon>mdi-close</v-icon>
+          </v-btn>
+        </v-card-title>
+        <v-card-text>
+          คุณแน่ใจหรือไม่ที่คุณจะลบรายการนี้?
+          <div class="mt-6 d-flex flex-row-reverse">
+            <v-btn
+              :loading="deleteNoteGroup.loading"
+              elevation="0"
+              height="36"
+              color="error"
+              @click="onDeleteNoteGroup()"
+            >
+              <div class="cp-text-capitalize">ยืนยัน</div>
+            </v-btn>
+          </div>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
+
+    <!-- Delete Report -->
+    <v-dialog
+      v-model="deleteReport.dialog"
+      :persistent="deleteReport.loading"
+      max-width="400px"
+      transition="dialog-transition"
+      content-class="elevation-0"
+      scrollable
+    >
+      <v-card>
+        <v-card-title>
+          ลบรายงานนี้
+          <v-spacer />
+          <v-btn
+            :disabled="deleteReport.loading"
+            icon
+            class="mt-n4 mr-n4"
+            @click="deleteReport.dialog = false"
+          >
+            <v-icon>mdi-close</v-icon>
+          </v-btn>
+        </v-card-title>
+        <v-card-text>
+          คุณแน่ใจหรือไม่ที่คุณจะลบรายงานนี้?
+          <div class="mt-6 d-flex flex-row-reverse">
+            <v-btn
+              :loading="deleteReport.loading"
+              elevation="0"
+              height="36"
+              color="error"
+              @click="onDeleteReport()"
+            >
+              <div class="cp-text-capitalize">ยืนยัน</div>
+            </v-btn>
+          </div>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
+
     <!-- Report Approval -->
     <v-dialog
       v-model="approvalReport.dialog"
@@ -761,6 +950,13 @@
             <v-col cols="12">
               <v-divider class="my-4" />
             </v-col>
+            <!-- <v-col cols="4"> <b>บันทึกไฟล์</b> </v-col>
+            <v-col cols="8">
+              <b v-if="!createPDFModal.savePDF" class="cp-text-disable">
+                กำลังดำเนินการ...
+              </b>
+              <b v-else class="success--text">เสร็จสิ้น</b>
+            </v-col> -->
           </v-row>
         </v-card-text>
       </v-card>
@@ -787,10 +983,26 @@ export default {
         plan4: null,
       },
       noteGroupList: [],
+      addNote: {
+        loading: false,
+        valid: false,
+        title: "",
+        noteList: [],
+      },
+      deleteNoteGroup: {
+        loading: false,
+        dialog: false,
+        data: null,
+      },
       locationListStatus: false,
       locationList: [],
       systemListStatus: false,
       systemList: [],
+      deleteReport: {
+        loading: false,
+        dialog: false,
+        data: null,
+      },
       approvalReport: {
         loading: false,
         dialog: false,
@@ -814,13 +1026,6 @@ export default {
         setupPageSystem: 0,
         savePDF: false,
       },
-      headers: [
-        { text: "Deflect", sortable: false, value: "image_path" },
-        { text: "สถานะ", sortable: false, value: "deflect_status" },
-        { text: "รายละเอียด", sortable: false, value: "deflect_detail" },
-        // { text: "สร้างโดย", sortable: false, value: "created_at" },
-        // { text: "บันทึกสถานะ", sortable: false, value: "update_status_at" },
-      ],
     };
   },
 
@@ -829,13 +1034,21 @@ export default {
   },
 
   computed: {
-    ...mapState("user", ["accountId", "role", "appRoleList"]),
+    ...mapState("user", [
+      "accountId",
+      "avatarPath",
+      "firstName",
+      "lastName",
+      "codeName",
+      "role",
+      "appRoleList",
+    ]),
   },
 
   watch: {
     reportDetail(newValue) {
       if (newValue) {
-        this.onGetInspectionNoteList();
+        this.onGetReportNoteList();
         this.onGetLocationList();
         this.onGetSystemList();
       }
@@ -879,15 +1092,6 @@ export default {
 
     formatPhoneNumber(phoneNumber) {
       return phoneNumber.replace(/(\d{3})(\d{3})(\d{4})/, "$1-$2-$3");
-    },
-
-    formatDateShot(dateStr) {
-      if (dateStr) {
-        const result = moment(dateStr).locale("th").format("DD MMM YY - HH:mm");
-        return result;
-      } else {
-        return "-";
-      }
     },
 
     async onGetReportDetail() {
@@ -935,15 +1139,14 @@ export default {
       }
     },
 
-    async onGetInspectionNoteList() {
+    async onGetReportNoteList() {
       const accessToken = await this.getAccessToken();
       if (accessToken) {
         this.$axios
           .post(
-            `${process.env.API_ENDPOINT}/v1/project/inspection/get-note`,
+            `${process.env.API_ENDPOINT}/v1/project/inspection/report/note/note-list`,
             {
-              project_id: this.reportDetail.project_id,
-              inspection_id: this.reportDetail.inspection_id,
+              report_id: this.$route.query.id,
             },
             {
               headers: {
@@ -953,8 +1156,28 @@ export default {
           )
           .then(({ data }) => {
             if (data.data) {
-              data.data.sort((a, b) => a.item_number - b.item_number);
-              this.noteGroupList = data.data;
+              data.data.sort(
+                (a, b) => new Date(a.created_at) - new Date(b.created_at)
+              );
+              this.noteGroupList = data.data.map((item) => {
+                item.edit = false;
+                item.editNote = {
+                  loading: false,
+                  valid: true,
+                  title: item.report_title,
+                  noteList: item.note_list.map((note) => ({
+                    id: note.id,
+                    noteListValue: note.list_message,
+                  })),
+                };
+                return item;
+              });
+              for (let i = 0; i < this.noteGroupList.length; i++) {
+                this.noteGroupList[i].note_list.sort((a, b) => a.id - b.id);
+                this.noteGroupList[i].editNote.noteList.sort(
+                  (a, b) => a.id - b.id
+                );
+              }
             }
           })
           .catch(({ response }) => {
@@ -962,9 +1185,197 @@ export default {
               notifyValue: true,
               type: "error",
               title: "เกิดข้อผิดพลาด",
-              message: response.data,
+              message: response.data.data,
             });
           });
+      }
+    },
+
+    async onDeleteNoteGroup() {
+      const accessToken = await this.getAccessToken();
+      if (accessToken) {
+        this.deleteNoteGroup.loading = true;
+        this.$axios
+          .post(
+            `${process.env.API_ENDPOINT}/v1/project/inspection/report/note/delete`,
+            {
+              report_id: this.$route.query.id,
+              report_note_id: this.deleteNoteGroup.data.report_note_id,
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+              },
+            }
+          )
+          .then(({ data }) => {
+            if (data.data) {
+              this.onGetReportNoteList();
+              this.deleteNoteGroup.loading = false;
+              this.deleteNoteGroup.dialog = false;
+            }
+          })
+          .catch(({ response }) => {
+            this.deleteNoteGroup.loading = false;
+            this.onNotify({
+              notifyValue: true,
+              type: "error",
+              title: "เกิดข้อผิดพลาด",
+              message:
+                "ไม่พบข้อมูลรายงานนี้ อาจมีผู้ใช้งานท่านอื่นลบรายการตรวจแล้ว",
+            });
+          });
+      }
+    },
+
+    addNoteList() {
+      const item = {
+        noteListValue: "",
+      };
+      this.addNote.noteList.push(item);
+    },
+
+    deleteNoteList(index) {
+      this.addNote.noteList.splice(index, 1);
+    },
+
+    async saveNoteList() {
+      if (this.$refs.formAddNote.validate()) {
+        this.addNote.loading = true;
+        const setData = {
+          title: this.addNote.title.trim(),
+          noteList: [],
+        };
+        for (let i = 0; i < this.addNote.noteList.length; i++) {
+          setData.noteList.push(this.addNote.noteList[i].noteListValue.trim());
+        }
+
+        const accessToken = await this.getAccessToken();
+        if (accessToken) {
+          this.$axios
+            .post(
+              `${process.env.API_ENDPOINT}/v1/project/inspection/report/note/add`,
+              {
+                project_id: this.reportDetail.project_id,
+                inspection_id: this.reportDetail.inspection_id,
+                report_id: this.$route.query.id,
+                report_title: setData.title,
+                note_list: setData.noteList,
+              },
+              {
+                headers: {
+                  Authorization: `Bearer ${accessToken}`,
+                },
+              }
+            )
+            .then(({ data }) => {
+              if (data.data) {
+                this.onGetReportNoteList();
+                this.addNote.title = "";
+                this.addNote.noteList = [];
+                this.$refs.formAddNote.resetValidation();
+                this.addNote.loading = false;
+              }
+            })
+            .catch(({ response }) => {
+              this.addNote.loading = false;
+              this.onNotify({
+                notifyValue: true,
+                type: "error",
+                title: "เกิดข้อผิดพลาด",
+                message:
+                  "ไม่พบข้อมูลรายงานนี้ อาจมีผู้ใช้งานท่านอื่นลบรายการตรวจแล้ว",
+              });
+            });
+        }
+      }
+    },
+
+    onEditNote(data) {
+      const hasUnfinishedEdits = this.noteGroupList.some(
+        (element) => element.edit
+      );
+      if (hasUnfinishedEdits) {
+        this.onNotify({
+          notifyValue: true,
+          type: "warning",
+          title: "แจ้งเตือน",
+          message: "มีรายการที่ยังแก้ไขไม่แล้วเสร็จ",
+        });
+      } else {
+        data.edit = true;
+      }
+    },
+
+    cancelEditNoteGroup(data) {
+      data.editNote.title = data.report_title;
+      data.editNote.noteList = data.note_list.map((note) => ({
+        noteListValue: note.list_message,
+      }));
+      data.edit = false;
+    },
+
+    addNoteEdit(data) {
+      const item = {
+        noteListValue: "",
+      };
+      data.editNote.noteList.push(item);
+    },
+
+    deleteNoteListEdit(data, index) {
+      data.editNote.noteList.splice(index, 1);
+    },
+
+    async onUpdateNoteGroup(data) {
+      if (this.$refs.formEditNote[0].validate()) {
+        data.editNote.loading = true;
+        const setData = {
+          title: data.editNote.title.trim(),
+          noteList: [],
+        };
+
+        const noteListPromises = data.editNote.noteList.map(async (item) => {
+          return await item.noteListValue.trim();
+        });
+
+        const noteListValues = await Promise.all(noteListPromises);
+
+        setData.noteList = noteListValues;
+
+        const accessToken = await this.getAccessToken();
+        if (accessToken) {
+          try {
+            const { data: responseData } = await this.$axios.post(
+              `${process.env.API_ENDPOINT}/v1/project/inspection/report/note/edit`,
+              {
+                project_id: this.reportDetail.project_id,
+                inspection_id: this.reportDetail.inspection_id,
+                report_id: this.$route.query.id,
+                report_note_id: data.report_note_id,
+                report_title: setData.title,
+                note_list: setData.noteList,
+              },
+              {
+                headers: {
+                  Authorization: `Bearer ${accessToken}`,
+                },
+              }
+            );
+            if (responseData.data) {
+              data.editNote.loading = false;
+              this.onGetReportNoteList();
+            }
+          } catch ({ response }) {
+            data.editNote.loading = false;
+            this.onNotify({
+              notifyValue: true,
+              type: "error",
+              title: "เกิดข้อผิดพลาด",
+              message:
+                "ไม่พบข้อมูลรายงานนี้ อาจมีผู้ใช้งานท่านอื่นลบรายการตรวจแล้ว",
+            });
+          }
+        }
       }
     },
 
@@ -987,11 +1398,8 @@ export default {
           )
           .then(({ data }) => {
             if (data.data) {
-              data.data.sort((a, b) => a.item_number - b.item_number);
               for (let i = 0; i < data.data.length; i++) {
                 data.data[i].deflect_list.sort((a, b) => a.id - b.id);
-                data.data[i].page = 1;
-                data.data[i].pageCount = 0;
               }
               this.locationList = data.data;
               this.locationListStatus = true;
@@ -1028,12 +1436,10 @@ export default {
             }
           )
           .then(({ data }) => {
+            // console.log(data.data)
             if (data.data) {
-              data.data.sort((a, b) => a.item_number - b.item_number);
               for (let i = 0; i < data.data.length; i++) {
                 data.data[i].deflect_list.sort((a, b) => a.id - b.id);
-                data.data[i].page = 1;
-                data.data[i].pageCount = 0;
               }
               this.systemList = data.data;
               this.systemListStatus = true;
@@ -1045,6 +1451,37 @@ export default {
               type: "error",
               title: "เกิดข้อผิดพลาด",
               message: response.data.data,
+            });
+          });
+      }
+    },
+
+    async onDeleteReport() {
+      const accessToken = await this.getAccessToken();
+      if (accessToken) {
+        this.$axios
+          .post(
+            `${process.env.API_ENDPOINT}/v1/project/inspection/report/delete`,
+            {
+              project_id: this.reportDetail.project_id,
+              inspection_id: this.reportDetail.inspection_id,
+              report_id: this.reportDetail.report_id,
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+              },
+            }
+          )
+          .then(({ data }) => {
+            this.$router.push("/projects/reports");
+          })
+          .catch(({ response }) => {
+            this.onNotify({
+              notifyValue: true,
+              type: "error",
+              title: "เกิดข้อผิดพลาด",
+              message: response,
             });
           });
       }
@@ -1269,7 +1706,12 @@ export default {
         };
       });
 
-      const noteDataGroup = this.noteGroupList;
+      const noteDataGroup = this.noteGroupList.map((e) => ({
+        title: e.report_title,
+        noteList: e.note_list.map((x) => ({
+          listMessage: x.list_message,
+        })),
+      }));
 
       const filterKeys = ["image_path", "deflect_status", "deflect_detail"];
       const filterDeflectList = (list) =>
@@ -1764,6 +2206,7 @@ export default {
       this.drawValue(pdfDoc, 135, 275, coordinatorDetail.email || "-", 60);
 
       // ---> Plan 1 Page
+
       const planPage1 = pdfPageDetail[1];
       if (planPage1) {
         pdfDoc.addPage();
@@ -1888,28 +2331,28 @@ export default {
         }
       });
 
-      // noteDataGroup.forEach((element) => {
-      //   if (element.newPage) {
-      //     pdfDoc.addPage();
-      //     this.drawSectionError(pdfDoc, 15, 10, 180, "หมายเหตุ");
-      //     this.drawFooterNote(pdfDoc);
-      //     this.drawNoteBox(
-      //       pdfDoc,
-      //       15,
-      //       element.yPosition,
-      //       element.title,
-      //       element.noteList
-      //     );
-      //   } else {
-      //     this.drawNoteBox(
-      //       pdfDoc,
-      //       15,
-      //       element.yPosition,
-      //       element.title,
-      //       element.noteList
-      //     );
-      //   }
-      // });
+      noteDataGroup.forEach((element) => {
+        if (element.newPage) {
+          pdfDoc.addPage();
+          this.drawSectionError(pdfDoc, 15, 10, 180, "หมายเหตุ");
+          this.drawFooterNote(pdfDoc);
+          this.drawNoteBox(
+            pdfDoc,
+            15,
+            element.yPosition,
+            element.title,
+            element.noteList
+          );
+        } else {
+          this.drawNoteBox(
+            pdfDoc,
+            15,
+            element.yPosition,
+            element.title,
+            element.noteList
+          );
+        }
+      });
 
       const topLeft = [15, 28];
       const topRight = [107, 28];
@@ -2171,6 +2614,39 @@ export default {
         this.createPDFModal.dialog = false;
         pdfDoc.save(`${fileName}.pdf`);
       }, 1500);
+    },
+
+    async pdfUpload(base64data, fileName) {
+      const accessToken = await this.getAccessToken();
+      if (accessToken) {
+        try {
+          const response = await this.$axios.post(
+            `${process.env.API_ENDPOINT}/v1/project/inspection/report/save-pdf`,
+            {
+              project_id: this.reportDetail.project_id,
+              inspection_id: this.reportDetail.inspection_id,
+              report_id: this.reportDetail.report_id,
+              pdf_base64: base64data,
+              pdf_name: fileName,
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+              },
+            }
+          );
+          // console.log(response.data.data)
+          this.onGetReportDetail();
+          return response.data.data;
+        } catch (error) {
+          this.onNotify({
+            notifyValue: true,
+            type: "error",
+            title: "เกิดข้อผิดพลาด",
+            message: error,
+          });
+        }
+      }
     },
   },
 };
